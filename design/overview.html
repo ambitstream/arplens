@@ -1,18 +1,21 @@
-<!-- @dsCard group="Brand" -->
+<!-- @dsCard group="Brief" -->
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ArpLens — Design Brief</title>
+    <title>ArpLens — Product &amp; UI Brief</title>
     <style>
       :root {
         color-scheme: dark;
         --bg: #0a0a0a;
+        --panel: #111111;
         --fg: #f5f5f5;
         --muted: #a3a3a3;
         --line: #262626;
         --accent: #22d3ee;
+        --warn: #fbbf24;
+        --warn-bg: #2a2210;
       }
       * {
         margin: 0;
@@ -21,33 +24,47 @@
       body {
         background: var(--bg);
         color: var(--fg);
-        font: 15px/1.6 system-ui, sans-serif;
+        font: 15px/1.65 system-ui, sans-serif;
         padding: 2.5rem;
-        max-width: 46rem;
+        max-width: 52rem;
       }
       h1 {
-        font-size: 1.6rem;
+        font-size: 1.7rem;
         letter-spacing: -0.02em;
       }
       h2 {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: var(--muted);
-        margin: 2rem 0 0.6rem;
+        color: var(--accent);
+        margin: 2.4rem 0 0.7rem;
+        border-top: 1px solid var(--line);
+        padding-top: 1.4rem;
+      }
+      h2:first-of-type {
+        border-top: none;
+        padding-top: 0;
+        margin-top: 2rem;
+      }
+      h3 {
+        font-size: 0.95rem;
+        margin: 1.2rem 0 0.4rem;
       }
       p {
         color: var(--muted);
       }
       .tagline {
         color: var(--fg);
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         margin-top: 0.4rem;
       }
       ol,
       ul {
         padding-left: 1.2rem;
         color: var(--muted);
+      }
+      li {
+        margin: 0.15rem 0;
       }
       li strong {
         color: var(--fg);
@@ -56,51 +73,310 @@
       .rule {
         border-left: 2px solid var(--accent);
         padding-left: 0.8rem;
-        margin-top: 0.5rem;
+        margin: 0.6rem 0;
       }
-      code {
+      .warn {
+        border: 1px solid #4a3a10;
+        background: var(--warn-bg);
+        color: #fde68a;
+        padding: 0.8rem 1rem;
+        border-radius: 6px;
+        margin: 0.8rem 0;
+        font-size: 0.9rem;
+      }
+      .warn strong {
+        color: var(--warn);
+      }
+      code,
+      pre {
         font: 0.85em ui-monospace, monospace;
         color: var(--accent);
+      }
+      pre {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0.8rem 1rem;
+        margin: 0.5rem 0;
+        white-space: pre-wrap;
+        color: var(--fg);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.6rem 0;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 0.4rem 0.6rem 0.4rem 0;
+        color: var(--muted);
+      }
+      th {
+        color: var(--fg);
+        font-weight: 500;
+      }
+      dl {
+        display: grid;
+        grid-template-columns: 10rem 1fr;
+        gap: 0.35rem 1rem;
+        margin: 0.5rem 0;
+      }
+      dt {
+        color: var(--fg);
+        font-weight: 500;
+      }
+      dd {
+        color: var(--muted);
+        margin: 0;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+      }
+      @media (max-width: 40rem) {
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <h1>ArpLens</h1>
     <p class="tagline">Recreate standard arpeggios from audio.</p>
-    <p>Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW.</p>
+    <p>
+      Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW. This file is
+      the complete product &amp; UI brief for design work — sourced verbatim from the frozen
+      specification (v2.1). Treat quoted copy as literal, not a paraphrase target.
+    </p>
 
-    <h2>One page, one workflow</h2>
+    <h2>What ArpLens is / is not</h2>
+    <p>
+      ArpLens analyzes a short audio fragment containing a standard synthesizer arpeggio and
+      reconstructs the arpeggiator settings required to recreate it — <strong>not</strong> a
+      transcription tool, <strong>not</strong> a MIDI extraction tool. It reconstructs
+      <strong>arpeggiator settings</strong>, not performances, and reconstructs
+      <strong>how the arpeggiator was programmed</strong>, not the original synth sound.
+    </p>
+    <p>Typical user questions it answers: which notes were held, which style, what rate, how many octaves, what BPM.</p>
+
+    <h2>Terminology (do not blur these)</h2>
+    <dl>
+      <dt>Uploaded Audio</dt>
+      <dd>The whole file the user uploads. Up to 200 MB / 10 minutes. No duration constraint at this step.</dd>
+      <dt>Focus Region</dt>
+      <dd>A user-selected ≤1 minute window, only required if the uploaded audio is longer than 1 minute.</dd>
+      <dt>Loop</dt>
+      <dd>The final 3–20 second fragment selected inside the Focus Region. This is the ONLY place a duration range applies.</dd>
+      <dt>Input Notes</dt>
+      <dd>The notes the musician held, fed into the arpeggiator (e.g. C, D#, G).</dd>
+      <dt>Generated Sequence</dt>
+      <dd>What the Style Registry produces from Input Notes + Style + Octaves.</dd>
+      <dt>Detected Sequence</dt>
+      <dd>What the app shows the user — either the generated sequence (complete result) or the quantized transcription (partial result).</dd>
+      <dt>Confidence</dt>
+      <dd>One overall band — High / Medium / Low — never a numeric score in the UI.</dd>
+    </dl>
+
+    <h2>Full workflow (7 steps)</h2>
     <ol>
-      <li><strong>Upload</strong> — drag &amp; drop or browse (MP3 / WAV / M4A)</li>
-      <li><strong>Waveform</strong> — Focus Region, then a 3–20 s loop selection</li>
-      <li><strong>Analyze</strong> — one primary button with progress state</li>
-      <li><strong>Results</strong> — BPM, Input Notes, Style, Rate, Octaves, Sequence, Confidence</li>
-      <li><strong>Edit</strong> — notes, style, rate, octaves, BPM ×2/÷2</li>
-      <li><strong>Preview</strong> — looping Tone.js playback (Play / Pause / Loop)</li>
+      <li><strong>Upload</strong> — drag &amp; drop or click to browse. MP3 / WAV / M4A. No duration limit shown here beyond the max-file warning.</li>
+      <li><strong>Focus Region</strong> — only if audio &gt; 1 minute; user selects max 1 minute. Skipped entirely for shorter files.</li>
+      <li><strong>Loop Selection</strong> — inside the Focus Region; 3–20 seconds; should loop seamlessly; selection quality drives analysis quality.</li>
+      <li><strong>Analyze</strong> — one primary button.</li>
+      <li><strong>Review</strong> — results appear only after analysis completes.</li>
+      <li><strong>Edit</strong> — optional, never re-runs transcription.</li>
+      <li><strong>Preview</strong> — looping playback of the reconstructed arpeggio.</li>
     </ol>
 
-    <h2>Components</h2>
+    <div class="warn">
+      <strong>Common mistake to avoid:</strong> the 3–20 second constraint belongs ONLY to Loop
+      Selection (step 3, inside the Waveform component). The Upload component (step 1) must never
+      show a "3–20 seconds" hint — it accepts a full audio file up to 200 MB / 10 minutes, with a
+      warning (not a rejection) above 100 MB or 6 minutes.
+    </div>
+
+    <h2>Page layout</h2>
+    <p>Single page. No routing, no navigation, no modals. Sections top to bottom, all always on one page:</p>
+    <pre>ArpLens (header)
+Upload Audio
+Waveform
+Analysis
+Results
+Preview</pre>
+
+    <h3>Component tree</h3>
+    <pre>App
+ ├── Header
+ ├── UploadCard
+ ├── Waveform
+ │      ├── FocusRegion
+ │      ├── LoopSelection
+ │      └── PlaybackControls
+ ├── AnalyzeButton
+ ├── ResultPanel
+ │      ├── BPMCard
+ │      ├── NotesEditor
+ │      ├── StyleEditor
+ │      ├── RateEditor
+ │      ├── OctavesEditor
+ │      ├── SequenceView
+ │      └── ConfidenceBadge
+ ├── PreviewPlayer
+ └── PlaybackController</pre>
+
+    <h2>Section 1 — Header</h2>
+    <p>Logo, headline, subtitle. Exact copy:</p>
+    <pre>Recreate standard arpeggios from audio.</pre>
+    <pre>Get ready-to-use arpeggiator settings
+for your favorite synth, plugin or DAW.</pre>
+
+    <h2>Section 2 — Upload</h2>
     <ul>
-      <li>Header · UploadCard · Waveform (FocusRegion, LoopSelection, PlaybackControls)</li>
-      <li>AnalyzeButton · ResultPanel (BPMCard, NotesEditor, StyleEditor, RateEditor, OctavesEditor, SequenceView, ConfidenceBadge)</li>
-      <li>PreviewPlayer · PlaybackController</li>
+      <li>Supports drag &amp; drop, and click to browse</li>
+      <li>Formats: MP3, WAV, M4A (browser-supported codecs)</li>
+      <li>Validation: unsupported format, maximum size, browser decode errors</li>
+      <li>Warning (not blocking) above 100 MB or 6 minutes, shown before analysis</li>
+      <li><strong>No duration constraint at this step</strong> — see callout above</li>
+    </ul>
+    <h3>Empty state — exact copy</h3>
+    <pre>Drop an audio file here
+
+or
+
+Click to browse</pre>
+
+    <h2>Section 3 — Waveform</h2>
+    <p>Displays: audio waveform, playback cursor, selection overlays.</p>
+    <div class="grid2">
+      <div>
+        <h3>Focus Region</h3>
+        <p>Only if audio &gt; 1 minute. Max 1 minute. Only this region is used afterwards. Skipped if audio is already short.</p>
+      </div>
+      <div>
+        <h3>Loop Selection</h3>
+        <p>Inside the Focus Region. Min 3s, max 20s. Draggable handles; the control itself prevents invalid lengths.</p>
+      </div>
+    </div>
+    <h3>Playback controls</h3>
+    <p>Play, Pause, Loop. Loops only the selected fragment.</p>
+    <h3>Instruction — exact copy</h3>
+    <pre>Select one complete arpeggio phrase that loops seamlessly.
+
+The better the loop,
+the more accurate the analysis.</pre>
+
+    <h2>Section 4 — Analysis</h2>
+    <p>One primary button, exact label: <code>Analyze</code>. States: Idle → Loading → Completed → Failed. During analysis: disable editing, show a spinner, status text <code>Analyzing...</code></p>
+
+    <h2>Section 5 — Results</h2>
+    <p>Appear only after analysis (progressive disclosure). Reference layout, complete result:</p>
+    <pre>BPM            124
+Input Notes    C  D#  G
+Style          Up
+Rate           1/16
+Octaves        2
+Detected Seq.  C2 D#2 G2 C3 D#3 G3
+Confidence     High</pre>
+    <h3>Partial result example</h3>
+    <pre>BPM            ✓ 124
+Rate           ✓ 1/16
+Input Notes    ✓ C  ✓ E  ✓ G
+Octaves        ✓ 2
+Style          Not detected</pre>
+    <p>Only confidently determined parameters are shown. Missing ones read <code>Not detected</code> — never a placeholder, dash, or guessed value.</p>
+
+    <h3>Confidence</h3>
+    <p>Exactly one of <code>High</code> / <code>Medium</code> / <code>Low</code>, paired with green / yellow / red. The text label must always be visible — color alone is never sufficient (accessibility requirement).</p>
+
+    <h2>Section 6 — Manual Editing</h2>
+    <p>Editable: Input Notes, Style, Rate, Octaves, BPM. Editing never re-runs transcription — it only regenerates the Detected Sequence and Preview.</p>
+    <div class="grid2">
+      <div>
+        <h3>Input Notes</h3>
+        <pre>[C] [D#] [G] [+ Add Note]</pre>
+        <p>Selecting a note opens a picker: C, C#, D, D#, … plus Delete.</p>
+      </div>
+      <div>
+        <h3>Style</h3>
+        <p>Dropdown. Initially: Up, Down, UpDown, DownUp. Future styles load automatically from the Style Registry — no code change needed to add one.</p>
+      </div>
+      <div>
+        <h3>Rate</h3>
+        <p>Dropdown: 1/4, 1/8, 1/16, 1/32, 1/4T, 1/8T, 1/16T, 1/32T.</p>
+      </div>
+      <div>
+        <h3>Octaves</h3>
+        <pre>[-]  2  [+]</pre>
+      </div>
+    </div>
+    <h3>BPM</h3>
+    <pre>124   [- ÷2]   [×2]</pre>
+    <p>×2/÷2 update Rate accordingly. If halving or doubling would push Rate outside the supported list, that button is disabled (not hidden — just non-interactive).</p>
+    <h3>Editing partial results</h3>
+    <p>All fields stay editable on a partial result. The Preview only switches from the quantized transcription to the registry-generated sequence once <strong>all</strong> of Input Notes, Style, Octaves, BPM and Rate are set (detected or user-entered).</p>
+
+    <h2>Section 7 — Preview</h2>
+    <p>Controls: Play, Pause, Loop only (no Stop, no one-shot mode — playback always loops).</p>
+    <p><strong>Preview and original-audio playback are mutually exclusive</strong> — starting one pauses the other, enforced by an app-level Playback Controller. A/B comparison happens by toggling between the two, not simultaneous playback.</p>
+
+    <h2>Loading states</h2>
+    <pre>Upload → Ready → Analyzing → Displaying Results → Editing → Preview</pre>
+
+    <h2>Error states</h2>
+    <p>Each gets its own specific message, never a generic failure:</p>
+    <ul>
+      <li>Unsupported Browser</li>
+      <li>Unsupported Audio Format</li>
+      <li>Audio Decode Failed</li>
+      <li>No Pitched Notes Detected</li>
+      <li>No Repeating Arpeggio Detected</li>
+      <li>Arpeggiator Style Not Detected</li>
+      <li>Analysis Engine Unavailable</li>
+      <li>Unexpected Error</li>
     </ul>
 
-    <h2>Non-negotiables (frozen spec v2.1)</h2>
-    <div class="rule">
-      <p>Honest UI: unknown values show <code>Not detected</code> — never placeholders.</p>
-    </div>
-    <div class="rule">
-      <p>
-        Confidence is <code>High / Medium / Low</code> with green / yellow / red — the text label
-        is always visible; color is never the only channel.
-      </p>
-    </div>
-    <div class="rule">
-      <p>Sharp note names only (<code>C# D# F#</code>). Subtle animations. Keyboard accessible.</p>
-    </div>
-    <div class="rule">
-      <p>Desktop-first, mobile-friendly; everything stacks, no functionality removed.</p>
-    </div>
+    <h2>Responsive &amp; accessibility</h2>
+    <ul>
+      <li>Desktop is the primary experience; the app is mobile-friendly with no functionality removed</li>
+      <li>Desktop: two-column results if space allows · Tablet: single column · Mobile: everything stacks</li>
+      <li>Keyboard accessible, visible focus states, semantic HTML, accessible button labels</li>
+      <li>Color is never the only communication channel (see Confidence above)</li>
+    </ul>
+
+    <h3>Animations</h3>
+    <p>Allowed: fade, opacity, small transitions. Avoid: large motion, complex page transitions, decorative animation.</p>
+
+    <h2>Reference data for editors</h2>
+    <table>
+      <tr><th>Supported Styles (MVP)</th><th>Supported Rates (MVP)</th></tr>
+      <tr><td>Up</td><td>1/4</td></tr>
+      <tr><td>Down</td><td>1/8</td></tr>
+      <tr><td>UpDown</td><td>1/16</td></tr>
+      <tr><td>DownUp</td><td>1/32</td></tr>
+      <tr><td></td><td>1/4T</td></tr>
+      <tr><td></td><td>1/8T</td></tr>
+      <tr><td></td><td>1/16T</td></tr>
+      <tr><td></td><td>1/32T</td></tr>
+    </table>
+    <p>Notes always use <strong>sharp notation only</strong> — <code>C# D# F#</code> — flats (Db, Eb, Gb) are never displayed.</p>
+
+    <h2>Non-negotiable rules</h2>
+    <div class="rule"><p>Honest UI: never invent or guess a value; unknown stays <code>Not detected</code>.</p></div>
+    <div class="rule"><p>Single Page Application: no routing, no navigation, no modal workflows.</p></div>
+    <div class="rule"><p>Progressive disclosure: Results are hidden until analysis finishes.</p></div>
+    <div class="rule"><p>Minimal interface: only controls required for the current step are visible.</p></div>
+    <div class="rule"><p>Every action gets immediate visual feedback; long operations always show progress.</p></div>
+    <div class="rule"><p>Preview vs. original audio playback is mutually exclusive (toggle, not simultaneous).</p></div>
+
+    <h2>Product boundaries (out of scope for MVP — do not design for these)</h2>
+    <p>
+      MIDI export, plugin/preset export, DAW integration, source separation, polyphonic
+      arpeggiators, Chord Trigger, a Piano Roll editor, ADSR/filter/oscillator detection, sound
+      recreation, AI recommendations, user accounts, cloud storage, collaboration, analytics.
+    </p>
   </body>
 </html>
