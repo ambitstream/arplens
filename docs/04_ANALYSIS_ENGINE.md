@@ -1,0 +1,607 @@
+# Analysis Engine
+
+**Project:** ArpLens
+
+**Version:** 2.0 (Frozen)
+
+---
+
+# Purpose
+
+The Analysis Engine is responsible for reconstructing standard arpeggiator settings from a short audio fragment.
+
+It receives an audio loop selected by the user and returns the most probable arpeggiator configuration that explains the observed note sequence.
+
+The engine is deterministic.
+
+It never invents information.
+
+Whenever confidence is insufficient, the engine produces a partial result instead of an incorrect complete result.
+
+---
+
+# Scope
+
+The Analysis Engine is responsible for:
+
+- audio transcription
+- note cleanup
+- pitch normalization
+- timing analysis
+- step-grid estimation
+- quantization
+- cycle detection
+- hypothesis generation
+- style matching
+- BPM/rate resolution
+- confidence evaluation
+- partial-result generation
+
+The engine is NOT responsible for:
+
+- UI
+- waveform rendering
+- file upload
+- playback controls
+- Tone.js synthesis
+
+---
+
+# Design Principles
+
+## Deterministic
+
+The same input always produces the same output.
+
+---
+
+## Honest
+
+Never invent missing information.
+
+Unknown is always better than incorrect.
+
+---
+
+## Pure
+
+The engine contains no UI logic.
+
+---
+
+## Stateless
+
+The engine keeps no persistent state between analyses.
+
+Every request is independent.
+
+---
+
+## Configurable
+
+Thresholds are configuration values.
+
+Algorithms are code.
+
+Configuration and implementation must remain separate.
+
+---
+
+# High-Level Pipeline
+
+```
+Decode Audio
+
+↓
+
+Basic Pitch Transcription
+
+↓
+
+Cleanup
+
+↓
+
+Pitch Normalization
+
+↓
+
+Step Grid Estimation
+
+↓
+
+Quantization
+
+↓
+
+Cycle Detection
+
+↓
+
+Joint Hypothesis Enumeration
+
+↓
+
+Style Matching
+
+↓
+
+Joint BPM / Rate Resolution
+
+↓
+
+Confidence Evaluation
+
+↓
+
+Partial Result Assembly
+
+↓
+
+Result DTO
+```
+
+---
+
+# Stage 1 — Decode Audio
+
+Input:
+
+- selected loop (3–20 seconds)
+
+Responsibilities:
+
+- decode
+- convert to mono
+- resample if required
+
+Output:
+
+PCM buffer
+
+Failure:
+
+Audio Decode Failed
+
+---
+
+# Stage 2 — Basic Pitch
+
+Spotify Basic Pitch (WASM)
+
+Input:
+
+PCM
+
+Output:
+
+Pitch Events
+
+Each event contains:
+
+- pitch
+- onset
+- offset
+- confidence
+
+The engine treats this output as noisy observations.
+
+No product decisions are made here.
+
+---
+
+# Stage 3 — Cleanup
+
+Purpose:
+
+Convert noisy transcription into a clean monophonic event stream.
+
+Operations:
+
+- confidence filtering
+- minimum duration filtering
+- merge split notes
+- remove overlapping duplicates
+- remove sustained background notes
+
+Output:
+
+Ordered monophonic pitch events
+
+The cleanup stage must never classify styles.
+
+---
+
+# Stage 4 — Pitch Normalization
+
+Responsibilities:
+
+Estimate global tuning offset.
+
+Snap detected pitches to semitones.
+
+Use sharp note naming only.
+
+Examples:
+
+C#
+
+D#
+
+F#
+
+Flat notation is never produced.
+
+---
+
+# Stage 5 — Step Grid Estimation
+
+Purpose:
+
+Estimate the temporal grid of the arpeggio.
+
+The atomic timing unit is the step.
+
+The engine estimates:
+
+- step duration
+- grid phase
+
+The engine does NOT estimate BPM here.
+
+Output:
+
+Step Grid
+
+---
+
+# Stage 6 — Quantization
+
+Responsibilities:
+
+Assign every detected note to the nearest grid step.
+
+Record:
+
+- quantized sequence
+- timing residuals
+
+Output:
+
+Ordered quantized sequence
+
+---
+
+# Stage 7 — Cycle Detection
+
+Purpose:
+
+Find one repeating arpeggio cycle.
+
+Two supported cases:
+
+Case A
+
+Selection contains exactly one cycle.
+
+↓
+
+Entire selection becomes the cycle.
+
+Case B
+
+Selection contains multiple cycles.
+
+↓
+
+Detect shortest repeating period.
+
+↓
+
+Evaluate cycle consistency.
+
+Approximate cycle detection is intentionally outside MVP.
+
+---
+
+# Stage 8 — Joint Hypothesis Enumeration
+
+Purpose
+
+Generate candidate arpeggiator configurations.
+
+The following parameters are determined together:
+
+- Input Notes
+- Octaves
+- Style
+
+These values are never inferred independently.
+
+Every hypothesis represents one complete explanation of the observed sequence.
+
+---
+
+# Stage 9 — Style Matching
+
+The Style Registry generates expected note sequences.
+
+Each generated sequence is compared against the detected cycle.
+
+Comparison is:
+
+- deterministic
+- rotation invariant
+
+Exact matches are preferred.
+
+Near matches use edit-distance scoring.
+
+Tie-breaking:
+
+1. Fewest input notes
+
+2. Fewest octaves
+
+3. Registry order
+
+The winning hypothesis becomes the reconstructed arpeggiator configuration.
+
+---
+
+# Stage 10 — BPM / Rate Resolution
+
+BPM and Rate are resolved together.
+
+Neither parameter is considered primary.
+
+The engine evaluates supported rate values.
+
+Supported rates are defined in the PRD.
+
+If multiple solutions are valid:
+
+Apply the deterministic preference rule.
+
+Users may later switch BPM using:
+
+×2
+
+÷2
+
+without re-running transcription.
+
+---
+
+# Stage 11 — Confidence Evaluation
+
+Confidence is calculated from four independent components.
+
+## Transcription
+
+Quality of detected pitch events.
+
+---
+
+## Grid
+
+Quality of temporal alignment.
+
+---
+
+## Pattern
+
+Quality of style matching.
+
+---
+
+## Ambiguity
+
+Difference between the best and second-best hypothesis.
+
+---
+
+Overall confidence equals the weakest component.
+
+Displayed values:
+
+- High
+- Medium
+- Low
+
+Internal scores are implementation details.
+
+---
+
+# Stage 12 — Partial Results
+
+The engine may stop before a complete reconstruction.
+
+Supported levels:
+
+Level 0
+
+No pitched material.
+
+↓
+
+Failure.
+
+---
+
+Level 1
+
+Detected sequence only.
+
+---
+
+Level 2
+
+Sequence
+
+Step Duration
+
+BPM
+
+Rate
+
+---
+
+Level 3
+
+Input Notes
+
+Octaves
+
+Sequence
+
+BPM
+
+Rate
+
+---
+
+Level 4
+
+Complete reconstruction.
+
+Includes:
+
+Style
+
+Confidence
+
+Preview enabled.
+
+The engine never skips directly to a higher level.
+
+---
+
+# Result DTO
+
+The engine returns one immutable object.
+
+Example:
+
+```typescript
+{
+    status,
+    bpm,
+    rate,
+    inputNotes,
+    octaves,
+    style,
+    sequence,
+    confidence,
+    engineVersion
+}
+```
+
+User edits never modify this object.
+
+---
+
+# Determinism
+
+The following values are fixed:
+
+- registry
+- thresholds
+- tie-break order
+- algorithms
+
+Randomness is prohibited.
+
+---
+
+# Performance
+
+Heavy computation runs inside a Web Worker.
+
+Basic Pitch uses the WASM backend.
+
+The UI thread must remain responsive during analysis.
+
+---
+
+# Thresholds
+
+The following values are configurable.
+
+Examples:
+
+- confidence floor
+- quantization tolerance
+- ambiguity epsilon
+
+Thresholds are NOT hardcoded inside algorithms.
+
+Calibration is performed using the Test Corpus.
+
+---
+
+# Failure States
+
+The engine distinguishes between:
+
+- Audio Decode Failed
+- Unsupported Format
+- No Pitched Material
+- Style Not Detected
+- Internal Engine Error
+
+Each failure has its own state.
+
+---
+
+# Future Compatibility
+
+The Analysis Engine is designed to support future extensions without redesign.
+
+Examples:
+
+- additional styles
+- polyphonic steps
+- Chord Trigger
+- GPU acceleration
+- alternative transcription engines
+
+These extensions must preserve the public Result DTO.
+
+---
+
+# Out of Scope
+
+The Analysis Engine does not perform:
+
+- sound recreation
+- preset reconstruction
+- oscillator detection
+- filter detection
+- ADSR detection
+- MIDI export
+- plugin integration
+
+---
+
+# Definition of Done
+
+The Analysis Engine is considered complete when:
+
+- all Tier 0–3 tests pass
+- deterministic output is verified
+- confidence calibration is complete
+- no confidently incorrect result exists within the official Test Corpus
+- the engine produces partial results instead of incorrect complete reconstructions
+
+## Engine Versioning
+
+Every analysis result must include:
+
+- engineVersion
+- registryVersion
+- configurationHash
+
+These values are intended for debugging, benchmarking and reproducibility.
+
+They are not required to be displayed in the user interface.

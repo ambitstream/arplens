@@ -1,0 +1,466 @@
+# Test Strategy
+
+**Project:** ArpLens
+
+**Version:** 2.0 (Frozen)
+
+---
+
+# Purpose
+
+This document defines how the Analysis Engine is validated.
+
+The goal is not simply to verify that the software works.
+
+The goal is to prove that the engine produces deterministic, honest and reproducible results.
+
+The Test Strategy covers:
+
+- correctness
+- determinism
+- robustness
+- regression prevention
+- future extensibility
+
+---
+
+# Testing Philosophy
+
+ArpLens follows one principle:
+
+> A confidently wrong result is worse than an incomplete result.
+
+The engine should prefer:
+
+Partial Result
+
+over
+
+Incorrect Complete Result.
+
+Every test should reinforce this principle.
+
+---
+
+# Testing Pyramid
+
+```
+                Manual Benchmark
+
+                       ▲
+
+                Integration Tests
+
+                       ▲
+
+             Engine Component Tests
+
+                       ▲
+
+          Registry Generator Tests
+
+                       ▲
+
+               Pure Function Tests
+```
+
+Most tests should exist at the lower levels.
+
+---
+
+# Test Tiers
+
+The project uses four test tiers.
+
+---
+
+# Tier 0 — Pure Algorithm Tests
+
+Purpose:
+
+Validate deterministic engine logic without audio.
+
+Components:
+
+- Style Registry
+- Quantization
+- Cycle Detection
+- Hypothesis Enumeration
+- Style Matching
+- BPM / Rate Resolution
+
+These tests should execute in milliseconds.
+
+They form the foundation of Continuous Integration.
+
+---
+
+## Tier 0 Fixtures
+
+Every supported style should be tested with:
+
+- 2 notes
+- 3 notes
+- 4 notes
+- 5 notes
+- 6 notes
+
+Across:
+
+- 1 octave
+- 2 octaves
+- 3 octaves
+- 4 octaves
+
+Every generated sequence should be tested against every supported rotation.
+
+---
+
+# Tier 1 — Clean Audio Tests
+
+Purpose:
+
+Validate the complete audio pipeline using synthetic recordings.
+
+Audio should be rendered directly from the Style Registry.
+
+This guarantees perfect ground truth.
+
+---
+
+## Required Cases
+
+Each supported style.
+
+Different:
+
+- note counts
+- octave counts
+- BPM values
+- playback rates
+
+Expected Result:
+
+Complete reconstruction.
+
+Confidence:
+
+High.
+
+---
+
+# Tier 2 — Robustness Tests
+
+Purpose:
+
+Measure graceful degradation.
+
+The engine should continue producing useful results under imperfect conditions.
+
+---
+
+## Test Cases
+
+Timing jitter
+
+Expected:
+
+Correct style.
+
+Confidence may decrease.
+
+---
+
+Global detuning
+
+Expected:
+
+Correct notes after pitch normalization.
+
+---
+
+Rich harmonics
+
+Expected:
+
+Cleanup removes harmonic artifacts.
+
+---
+
+Single octave error
+
+Expected:
+
+Style remains correct.
+
+Confidence decreases.
+
+---
+
+Delay
+
+Expected:
+
+Either:
+
+Correct result
+
+or
+
+Partial Result.
+
+Never:
+
+Incorrect High Confidence.
+
+---
+
+Reverb
+
+Expected:
+
+Graceful degradation.
+
+---
+
+Background Pad
+
+Expected:
+
+Pad filter removes sustained notes.
+
+---
+
+Dense Mix
+
+Expected:
+
+Partial Result acceptable.
+
+Incorrect Complete Result unacceptable.
+
+---
+
+# Tier 3 — Failure Tests
+
+Purpose:
+
+Verify honest failure behavior.
+
+---
+
+## Silence
+
+Expected:
+
+No Pitched Material.
+
+---
+
+## Drum Loop
+
+Expected:
+
+No Pitched Material.
+
+---
+
+## Vocal Melody
+
+Expected:
+
+No Style Detected.
+
+---
+
+## Non-Repeating Melody
+
+Expected:
+
+No Style Detected.
+
+---
+
+## Unsupported Pattern
+
+Expected:
+
+Partial Result.
+
+---
+
+## Unsupported Style
+
+Expected:
+
+No Style Detected.
+
+---
+
+## Corrupted Audio
+
+Expected:
+
+Audio Decode Failed.
+
+---
+
+## Unsupported Codec
+
+Expected:
+
+Unsupported Audio Format.
+
+---
+
+# Determinism Tests
+
+Every deterministic test should verify:
+
+Same input
+
+↓
+
+Same output
+
+Across:
+
+- repeated executions
+- browser reloads
+- operating systems
+
+Engine Version must remain identical.
+
+---
+
+# Regression Tests
+
+Every bug fix must include:
+
+- one new automated test
+- one regression fixture if applicable
+
+A bug without a regression test is considered incomplete.
+
+---
+
+# Performance Tests
+
+The following metrics should be measured.
+
+Analysis Time
+
+Memory Usage
+
+Worker Responsiveness
+
+Preview Generation Time
+
+Performance targets are benchmark-driven and are intentionally not hardcoded in the MVP.
+
+---
+
+# Benchmark Corpus
+
+A benchmark corpus should contain:
+
+## Clean Synth Arpeggios
+
+Ground truth.
+
+---
+
+## Real Songs
+
+Commercial recordings.
+
+---
+
+## Self-Produced Material
+
+Used to validate realistic workflows.
+
+---
+
+## Edge Cases
+
+Delay
+
+Reverb
+
+Dense Mixes
+
+Detuned Audio
+
+Timing Imperfections
+
+---
+
+# Calibration
+
+The following values must be calibrated using the benchmark corpus.
+
+- Basic Pitch confidence threshold
+- Quantization tolerance
+- Edit distance budget
+- Ambiguity threshold
+- Confidence bands
+
+Calibration must be data-driven.
+
+No threshold should be chosen arbitrarily.
+
+---
+
+# Continuous Integration
+
+Every Pull Request should execute:
+
+Tier 0
+
+Tier 1
+
+Regression Tests
+
+The build must fail if any deterministic result changes unexpectedly.
+
+---
+
+# Acceptance Criteria
+
+The Analysis Engine is considered production-ready when:
+
+- all Tier 0 tests pass
+- all Tier 1 tests pass
+- Tier 2 produces graceful degradation
+- Tier 3 produces correct failure states
+- deterministic behavior is verified
+- no confidently incorrect result exists within the benchmark corpus
+
+---
+
+# Future Test Expansion
+
+Future versions may introduce:
+
+- Polyphonic Styles
+- Chord Trigger
+- MIDI Export
+- New Style Registry entries
+
+Each new feature must extend the existing test corpus.
+
+Existing tests must never be removed.
+
+---
+
+# Definition of Done
+
+The testing strategy is complete when:
+
+- every engine stage has automated tests
+- every supported style has fixture coverage
+- every documented failure state has at least one automated test
+- every production bug adds a regression test
+- benchmark results are reproducible
+- deterministic behavior is continuously verified
