@@ -1,4 +1,5 @@
 docs/
+design/
 dist/
 coverage/
 playwright-report/
