@@ -91,7 +91,7 @@ This version is considered the baseline for implementation.
 
 ---
 
-# v2.1 (Approved)
+# v2.1 (Frozen)
 
 Date:
 
@@ -99,7 +99,7 @@ Date:
 
 Status:
 
-Approved
+Frozen (2026-07-15)
 
 ---
 
