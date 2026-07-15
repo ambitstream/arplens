@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -208,7 +208,8 @@ Connect real audio.
 ### Deliverables
 
 - Web Worker
-- Audio decoding
+- Audio Decode Service (main thread)
+- Deterministic resampler
 - Basic Pitch (WASM)
 - Cleanup
 - Pitch normalization

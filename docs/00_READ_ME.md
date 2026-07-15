@@ -1,6 +1,6 @@
 # ArpLens Documentation
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -32,7 +32,13 @@ ArpLens reconstructs **arpeggiator settings**, not performances.
 
 Read the documentation in the following order.
 
-## 01_PRD.md
+## 01_GLOSSARY.md
+
+Defines the shared terminology used by every other document.
+
+---
+
+## 02_PRD.md
 
 Defines the product itself.
 
@@ -48,7 +54,7 @@ Contains:
 
 ---
 
-## 02_ARCHITECTURE.md
+## 03_ARCHITECTURE.md
 
 Defines the overall software architecture.
 
@@ -63,7 +69,7 @@ Contains:
 
 ---
 
-## 03_ANALYSIS_ENGINE.md
+## 04_ANALYSIS_ENGINE.md
 
 Defines the complete audio analysis pipeline.
 
@@ -82,7 +88,7 @@ This is the most important technical document in the project.
 
 ---
 
-## 04_STYLE_REGISTRY.md
+## 05_STYLE_REGISTRY.md
 
 Defines the Style Registry.
 
@@ -98,7 +104,7 @@ The Style Registry is the single source of truth for arpeggiator styles.
 
 ---
 
-## 05_UI_SPEC.md
+## 06_UI_SPEC.md
 
 Defines the complete user interface.
 
@@ -113,7 +119,7 @@ Contains:
 
 ---
 
-## 06_PREVIEW_ENGINE.md
+## 07_PREVIEW_ENGINE.md
 
 Defines the playback engine.
 
@@ -127,7 +133,7 @@ Contains:
 
 ---
 
-## 07_TEST_STRATEGY.md
+## 08_TEST_STRATEGY.md
 
 Defines testing.
 
@@ -141,7 +147,7 @@ Contains:
 
 ---
 
-## 08_DECISIONS.md
+## 09_DECISIONS.md
 
 Lists all approved engineering decisions.
 
@@ -149,7 +155,7 @@ Every important architectural decision should be recorded here together with its
 
 ---
 
-## 09_CODE_STYLE.md
+## 10_CODE_STYLE.md
 
 Defines implementation rules.
 
@@ -163,7 +169,7 @@ Contains:
 
 ---
 
-## 10_DEVELOPMENT_PLAN.md
+## 11_DEVELOPMENT_PLAN.md
 
 Defines the implementation roadmap.
 
@@ -176,7 +182,7 @@ Contains:
 
 ---
 
-## 11_CLAUDE_RULES.md
+## 12_CLAUDE_RULES.md
 
 Instructions for AI-assisted development.
 
@@ -188,7 +194,7 @@ Defines:
 
 ---
 
-## 12_CHANGELOG.md
+## 13_CHANGELOG.md
 
 Records every intentional change made after Documentation v2.0.
 
@@ -269,7 +275,7 @@ The architecture should allow new arpeggiator styles without changing existing c
 
 # Documentation Status
 
-This documentation represents the frozen specification for ArpLens v2.0.
+This documentation represents the active specification for ArpLens v2.1.
 
 Implementation should follow this specification.
 

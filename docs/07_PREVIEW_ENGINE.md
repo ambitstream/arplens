@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -89,12 +89,17 @@ Example:
 {
     bpm,
     rate,
+    stepDuration,
     inputNotes,
     style,
     octaves,
-    sequence
+    sequence,
+    sequenceSource
 }
 ```
+
+For partial results, `stepDuration` alone is sufficient to
+schedule playback.
 
 The Preview Engine never receives raw audio.
 
@@ -155,6 +160,9 @@ Tone.js
 ```
 
 The Preview Engine plays the quantized detected sequence.
+
+Timing is derived from `stepDuration`, which is always present
+whenever a quantized sequence exists.
 
 This allows the user to verify transcription quality even when no supported style was found.
 
@@ -233,10 +241,12 @@ Supported controls:
 
 - Play
 - Pause
-- Stop
 - Loop
 
-The preview always starts from the beginning of the reconstructed cycle.
+Pause resumes from the paused position.
+
+After any edit, playback restarts from the beginning of the
+reconstructed cycle.
 
 ---
 
@@ -250,13 +260,18 @@ There is no one-shot playback mode in the MVP.
 
 ---
 
-# Synchronization
+# A/B Comparison
 
-Whenever possible, the preview should remain synchronized with the original loop.
+Preview playback and original-audio playback are mutually
+exclusive.
 
-This enables rapid A/B comparison.
+The app-level Playback Controller (UI layer) enforces
+exclusivity: starting one pauses the other.
 
-The Preview Engine itself is not responsible for synchronization logic.
+A/B comparison is performed by toggling between the two.
+
+Simultaneous synchronized playback is intentionally out of
+scope for the MVP.
 
 ---
 

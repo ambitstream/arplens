@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -232,6 +232,16 @@ The Analysis Engine compares all valid rotations.
 The ordered note sequence produced after Quantization.
 
 It represents the Analysis Engine's interpretation of the performed arpeggio.
+
+---
+
+# Step Duration
+
+The duration of one Step in seconds, derived from the Step Grid.
+
+Step Duration is available whenever a Quantized Sequence exists.
+
+It is part of the Result DTO so that partial results remain playable.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -287,6 +287,90 @@ Improve responsiveness.
 
 ---
 
+## D-106
+
+### Main-thread Audio Decode
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Audio decoding runs in a main-thread Audio Decode Service.
+
+The Analysis Engine receives mono PCM only and performs its
+own deterministic resampling.
+
+Rationale
+
+`decodeAudioData` is unavailable inside Web Workers.
+
+The engine must remain free of browser APIs.
+
+Consequence
+
+Decode failures are raised before the engine runs.
+
+---
+
+## D-107
+
+### Determinism Scope
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Bit-exact determinism is guaranteed from PCM input onward,
+across browsers and operating systems.
+
+Lossy codec decoding (MP3, M4A) is deterministic only within a
+single environment.
+
+Rationale
+
+Browser codecs produce slightly different PCM from the same
+compressed file.
+
+Consequence
+
+Cross-environment determinism tests use WAV/PCM fixtures.
+
+---
+
+## D-108
+
+### Audio Memory Strategy
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Keep the 200 MB / 10 minute product limits.
+
+After decode: convert to mono immediately, release source
+buffers, keep waveform peaks, and retain only the Focus Region
+PCM.
+
+Rationale
+
+Bounded steady-state memory without changing product limits.
+
+Consequence
+
+The transient decode peak remains high.
+
+Very large files may fail on mobile devices.
+
+This is an accepted, documented constraint.
+
+---
+
 # Analysis Engine Decisions
 
 ## D-200
@@ -354,11 +438,15 @@ When multiple hypotheses score equally:
 
 1. Fewest Input Notes
 2. Fewest Octaves
-3. Registry Order
+3. Phase Preference (rotation-0 match)
+4. Registry Order
 
 Rationale
 
 Stable reproducible results.
+
+Amended in v2.1: Phase Preference was inserted before Registry
+Order to resolve rotation-equivalent styles (see D-206).
 
 ---
 
@@ -421,6 +509,120 @@ The engine may stop at any supported Partial Result level.
 Rationale
 
 Avoid incorrect complete reconstructions.
+
+---
+
+## D-206
+
+### Rotation-Equivalent Style Resolution
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Styles whose generated cycles are exact rotations of each
+other (UpDown / DownUp) are resolved by phase preference:
+prefer the hypothesis matching the observed loop at rotation 0.
+
+Rotation-equivalent aliases count as one hypothesis for the
+ambiguity confidence component.
+
+Rationale
+
+Rotation-invariant scoring alone cannot mathematically
+distinguish these styles.
+
+The loop start is usable evidence because users are instructed
+to select a phrase with a clean start.
+
+Consequence
+
+DownUp is detectable when the loop starts on its first note.
+
+UpDown / DownUp results are not permanently penalized to Low
+confidence.
+
+---
+
+## D-207
+
+### BPM / Rate Preference Rule
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Among valid (BPM, Rate) pairs: prefer BPM inside a configured
+range (default 90–180); then prefer rates in the order
+1/16, 1/8, 1/32, 1/4, 1/16T, 1/8T, 1/32T, 1/4T; otherwise
+choose the BPM closest to 120.
+
+Rationale
+
+D-203 requires joint resolution; a concrete deterministic rule
+was previously undefined.
+
+Consequence
+
+BPM ×2 / ÷2 buttons are disabled when the resulting Rate would
+leave the supported set.
+
+---
+
+## D-208
+
+### Partial Result Dependencies
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Level 1 includes Step Duration alongside the quantized
+sequence; preview is available from Level 1 upward.
+
+Level 3 (Input Notes + Octaves without Style) applies only
+when every competitive hypothesis agrees on notes and octaves
+while disagreeing on style.
+
+Rationale
+
+Quantization guarantees a step grid, so timing always exists
+when a sequence exists.
+
+The consensus rule reconciles Level 3 with D-200 (joint
+enumeration).
+
+Consequence
+
+The v2.0 PRD partial-result example was corrected to a
+reachable combination.
+
+---
+
+## D-209
+
+### Result DTO Contract
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+The Result DTO includes stepDuration, sequenceSource
+("registry" | "quantized"), registryVersion and
+configurationHash in addition to the v2.0 fields.
+
+Rationale
+
+Partial results must remain playable, consumers must know the
+sequence origin, and reproducibility metadata is mandatory.
 
 ---
 
@@ -497,6 +699,33 @@ Future support for:
 - Polyphonic Styles
 
 without redesign.
+
+---
+
+## D-303
+
+### Generator Context Object
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+generate() receives a single immutable GeneratorContext
+object ({ noteCount, octaves }).
+
+Future styles extend it with optional fields.
+
+Rationale
+
+Play Order requires the performed note order; a positional
+argument signature could not absorb new inputs without
+breaking existing generators.
+
+Consequence
+
+Random remains blocked on a seeded-randomness decision.
 
 ---
 
@@ -591,6 +820,30 @@ Instant feedback.
 
 ---
 
+## D-404
+
+### Editing Partial Results
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+All fields are editable in partial results.
+
+Registry regeneration activates only when Input Notes, Style,
+Octaves, BPM and Rate are all defined (detected or user-set).
+
+Until then, the preview plays the quantized detected sequence.
+
+Rationale
+
+Registry regeneration requires a style; the v2.0 spec left
+editing in style-less states undefined.
+
+---
+
 # Preview Decisions
 
 ## D-500
@@ -614,6 +867,34 @@ Fast.
 Deterministic.
 
 Enough for structural verification.
+
+---
+
+## D-501
+
+### Exclusive A/B Playback
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Preview and original audio never play simultaneously.
+
+An app-level Playback Controller enforces exclusivity:
+starting one pauses the other.
+
+Rationale
+
+Synchronizing Tone.Transport with the file player is complex
+and drift-prone.
+
+Toggling is sufficient for A/B comparison.
+
+Consequence
+
+Simultaneous synchronized playback is out of scope for the MVP.
 
 ---
 
@@ -660,6 +941,31 @@ Maintain a Golden Dataset for regression testing.
 Rationale
 
 Every engine version should be compared against the same reference data.
+
+---
+
+## D-602
+
+### Tier 1 Test Environment
+
+Status
+
+Approved (v2.1)
+
+Decision
+
+Tier 1 fixtures are pre-rendered WAV files committed to the
+repository, generated by a fixture script from the registry.
+
+Tier 1 tests run in a real browser via Playwright with the
+production Basic Pitch WASM backend.
+
+Rationale
+
+Tone.js rendering and Basic Pitch require a browser
+environment.
+
+Committed fixtures keep CI deterministic.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -286,26 +286,29 @@ BPM
 
 ✓ 124
 
+Rate
+
+✓ 1/16
+
 Input Notes
 
 ✓ C
 ✓ E
 ✓ G
 
-Style
-
-Not detected
-
-Rate
-
-Not detected
-
 Octaves
 
 ✓ 2
+
+Style
+
+Not detected
 ```
 
 Only confidently determined parameters should be shown.
+
+Partial results always respect the parameter dependency rules
+defined in the Analysis Engine document.
 
 ---
 

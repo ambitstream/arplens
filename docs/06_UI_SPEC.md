@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -538,6 +538,9 @@ Display:
 
 Changing BPM updates Rate accordingly.
 
+If halving or doubling would push Rate outside the supported
+range, the corresponding button is disabled.
+
 Manual editing never re-runs transcription.
 
 It regenerates only:
@@ -547,6 +550,27 @@ Detected Sequence
 ↓
 
 Preview
+
+---
+
+## Editing Partial Results
+
+All fields remain editable when the analysis returns a
+partial result.
+
+The sequence is regenerated through the Style Registry only
+when ALL of the following are defined (detected or user-set):
+
+- Input Notes
+- Style
+- Octaves
+- BPM and Rate
+
+Until then, the preview keeps playing the quantized detected
+sequence.
+
+As soon as the last missing field is set, the preview switches
+to the registry-generated sequence.
 
 ---
 
@@ -565,6 +589,17 @@ Loop
 Playback always loops.
 
 There is no one-shot playback mode.
+
+---
+
+Preview playback and original-audio playback are mutually
+exclusive.
+
+Starting one pauses the other.
+
+Exclusivity is enforced by the app-level Playback Controller.
+
+A/B comparison is performed by toggling between the two.
 
 ---
 
@@ -622,9 +657,11 @@ Audio Decode Failed
 
 No Pitched Notes Detected
 
+No Repeating Arpeggio Detected
+
 Arpeggiator Style Not Detected
 
-Analysis Engine Failed
+Analysis Engine Unavailable
 
 Unexpected Error
 
@@ -740,4 +777,5 @@ The UI is complete when:
  │      ├── OctavesEditor
  │      ├── SequenceView
  │      └── ConfidenceBadge
- └── PreviewPlayer
+ ├── PreviewPlayer
+ └── PlaybackController

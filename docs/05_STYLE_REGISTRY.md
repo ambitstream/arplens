@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.0 (Frozen)
+**Version:** 2.1
 
 ---
 
@@ -132,12 +132,16 @@ highest note
 
 # Input
 
-Every generator receives:
+Every generator receives one immutable context object:
 
-```
-noteCount
+```typescript
+GeneratorContext {
 
-octaves
+    noteCount
+
+    octaves
+
+}
 ```
 
 Example:
@@ -147,6 +151,16 @@ noteCount = 3
 
 octaves = 2
 ```
+
+Future styles may require additional information.
+
+New OPTIONAL fields may be added to the context without
+breaking existing generators.
+
+Example:
+
+Play Order will require the order in which the notes were
+played, supplied as an optional context field.
 
 ---
 
@@ -287,9 +301,7 @@ Pure generator function.
 Input:
 
 ```
-noteCount
-
-octaves
+GeneratorContext
 ```
 
 Output:
@@ -344,6 +356,18 @@ No architecture changes should be required.
 
 Only new registry entries.
 
+Two known caveats:
+
+`Play Order` requires the performed note order.
+
+It will be supplied through an optional GeneratorContext field
+(a non-breaking extension).
+
+`Random` conflicts with the determinism rules.
+
+It requires an explicit seeded-randomness decision before it
+can be added.
+
 ---
 
 # Registry Consumers
@@ -391,6 +415,25 @@ Generated sequences may begin at any point.
 The matcher is responsible for comparing all cyclic rotations.
 
 The registry itself never performs matching.
+
+---
+
+## Rotation-Equivalent Styles
+
+Some registry styles generate cycles that are exact rotations
+of each other for every input.
+
+Example:
+
+UpDown and DownUp.
+
+The matcher resolves this ambiguity using the phase-preference
+tie-break defined in the Analysis Engine document.
+
+The registry itself does not need to know about equivalence.
+
+Generator output order defines rotation 0 (the pattern start),
+which is what phase preference relies on.
 
 ---
 
