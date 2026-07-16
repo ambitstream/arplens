@@ -1,0 +1,585 @@
+<!-- @dsCard group="Components" viewport="820x1000" name="ResultPanel" subtitle="Complete result (editable) + partial result" -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Results — Amber Rack</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 44px;
+        background: var(--bg-0);
+        color: var(--text-hi);
+        font-family: var(--font-sans);
+        padding: 48px 24px;
+      }
+      .stack { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      .stack__lbl { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-lo); }
+
+      .card {
+        width: 640px;
+        border-radius: var(--r-lg);
+        background: var(--bg-1);
+        border: 1px solid var(--line);
+        overflow: visible;
+      }
+      .card__strip {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 11px 16px; border-bottom: 1px solid var(--line);
+      }
+      .card__id { display: flex; align-items: center; gap: 9px; }
+      .card__num { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bg-0); background: var(--accent); padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+      .card__title { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-hi); }
+      .card__body { padding: 18px; }
+
+      /* confidence badge */
+      .conf { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: var(--r-md); font-size: 12px; font-weight: 500; border: 1px solid; }
+      .conf__dot { width: 8px; height: 8px; border-radius: 2px; }
+      .conf__lbl { font-family: var(--font-mono); letter-spacing: 0.02em; }
+      .conf--hi { border-color: color-mix(in oklab, var(--sem-green) 45%, var(--line)); color: var(--sem-green); background: color-mix(in oklab, var(--sem-green) 8%, transparent); }
+      .conf--hi .conf__dot { background: var(--sem-green); }
+      .conf--md { border-color: color-mix(in oklab, var(--sem-yellow) 45%, var(--line)); color: var(--sem-yellow); background: color-mix(in oklab, var(--sem-yellow) 8%, transparent); }
+      .conf--md .conf__dot { background: var(--sem-yellow); }
+
+      .confrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+      .confrow__title { font-size: 15px; font-weight: 600; }
+
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .param {
+        position: relative;
+        border-radius: var(--r-md);
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        padding: 13px 14px;
+      }
+      .param--wide { grid-column: 1 / -1; }
+      .param__k {
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--text-lo); display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px;
+      }
+      .param__k .chk { color: var(--sem-green); }
+      .param__k-l { display: flex; align-items: center; gap: 6px; }
+      .param__row { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
+      .param__v { font-family: var(--font-mono); font-size: 22px; font-weight: 500; color: var(--text-hi); }
+      .param__v--editable { cursor: pointer; }
+      .param__v--editable:hover { color: var(--accent); }
+      .param__v small { font-size: 12px; color: var(--text-mid); font-weight: 400; margin-left: 4px; }
+      .param__v--nd { font-size: 14px; color: var(--text-lo); font-weight: 400; }
+
+      /* small icon buttons: edit pencil, +/-, x2/÷2 */
+      .icnbtn {
+        width: 22px; height: 22px; border-radius: 5px;
+        background: var(--bg-1); border: 1px solid var(--line); color: var(--text-mid);
+        display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px;
+        flex: 0 0 auto;
+      }
+      .icnbtn:hover { color: var(--text-hi); border-color: var(--text-lo); }
+      .icnbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .icnbtn:disabled { opacity: 0.35; cursor: not-allowed; }
+      .steppers { display: flex; align-items: center; gap: 8px; }
+      .steppers .icnbtn { width: 26px; height: 26px; font-size: 13px; }
+      .mini-ops { display: flex; align-items: center; gap: 6px; }
+      .mini-ops .icnbtn { font-family: var(--font-mono); font-size: 10px; width: auto; padding: 0 7px; height: 22px; }
+
+      /* dropdown menu */
+      .menu {
+        position: absolute; z-index: 20; top: calc(100% + 6px); right: 14px;
+        background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-sm);
+        box-shadow: 0 10px 24px -8px rgba(0,0,0,0.5);
+        display: none; flex-direction: column; padding: 4px; min-width: 108px;
+      }
+      .menu.is-open { display: flex; }
+      .menu button {
+        text-align: left; background: none; border: none; color: var(--text-hi);
+        font-family: var(--font-mono); font-size: 12.5px; padding: 7px 9px; border-radius: 4px; cursor: pointer;
+      }
+      .menu button:hover { background: color-mix(in oklab, var(--accent) 14%, transparent); color: var(--accent); }
+      .menu button.is-current { color: var(--accent); }
+      .menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+      /* note chips + note picker */
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+      .chip-wrap { position: relative; }
+      .chip {
+        font-family: var(--font-mono); font-size: 14px; font-weight: 500;
+        padding: 5px 11px; border-radius: var(--r-sm);
+        background: color-mix(in oklab, var(--accent) 14%, var(--bg-1));
+        border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--line));
+        color: var(--accent); cursor: pointer;
+      }
+      .chip:hover { filter: brightness(1.15); }
+      .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .chip-add {
+        width: 28px; height: 28px; border-radius: var(--r-sm);
+        background: var(--bg-1); border: 1px dashed var(--line); color: var(--text-mid);
+        display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px;
+      }
+      .chip-add:hover { color: var(--accent); border-color: color-mix(in oklab, var(--accent) 50%, var(--line)); }
+      .chip-add:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .note-menu {
+        position: absolute; z-index: 20; top: calc(100% + 6px); left: 0;
+        background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-sm);
+        box-shadow: 0 10px 24px -8px rgba(0,0,0,0.5);
+        display: none; padding: 6px; width: 168px;
+      }
+      .note-menu.is-open { display: block; }
+      .note-menu__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .note-menu__grid button {
+        font-family: var(--font-mono); font-size: 12px; background: var(--bg-1); border: 1px solid var(--line);
+        color: var(--text-hi); border-radius: 4px; padding: 6px 0; cursor: pointer;
+      }
+      .note-menu__grid button:hover { border-color: var(--accent); color: var(--accent); }
+      .note-menu__del {
+        margin-top: 6px; width: 100%; text-align: center; background: none; border: none;
+        color: var(--sem-red); font-family: var(--font-mono); font-size: 11.5px; padding: 7px 0; cursor: pointer; border-top: 1px solid var(--line);
+      }
+      .note-menu__del:hover { text-decoration: underline; }
+
+      .seq { display: flex; flex-wrap: wrap; gap: 6px; }
+      .seq__note {
+        font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+        padding: 6px 10px; border-radius: var(--r-sm);
+        background: var(--bg-1); border: 1px solid var(--line); color: var(--text-hi);
+      }
+      .seq__note b { color: var(--accent); font-weight: 600; }
+
+      /* play bar */
+      .playbar { display: flex; gap: 8px; margin-bottom: 14px; }
+      .playbtn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; padding: 8px 13px; border-radius: var(--r-md); background: var(--bg-2); border: 1px solid var(--line); color: var(--text-mid); cursor: pointer; }
+      .playbtn:hover { color: var(--text-hi); border-color: var(--text-lo); }
+      .playbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .playbtn__ico { font-size: 10px; line-height: 1; }
+      .playbtn.is-playing, .playbtn-tw.is-playing { background: color-mix(in oklab, var(--accent) 14%, var(--bg-2)); border-color: color-mix(in oklab, var(--accent) 45%, var(--line)); color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <!-- ===================== Complete result — editable ===================== -->
+    <div class="stack">
+      <span class="stack__lbl">ResultPanel — complete result (editable)</span>
+      <div class="card">
+        <div class="card__strip">
+          <div class="card__id"><span class="card__num">04</span><span class="card__title">RESULTS</span></div>
+        </div>
+        <div class="card__body">
+          <div class="playbar">
+            <button class="playbtn" type="button" data-play="source"><span class="playbtn__ico">▶</span>Play Source</button>
+            <button class="playbtn" type="button" data-play="modulation"><span class="playbtn__ico">▶</span>Play Modulation</button>
+          </div>
+          <div class="confrow">
+            <span class="confrow__title">Detected settings</span>
+            <span class="conf conf--hi"><span class="conf__dot"></span><span class="conf__lbl">High confidence</span></span>
+          </div>
+
+          <div class="grid">
+            <!-- BPM -->
+            <div class="param">
+              <div class="param__k">
+                <span class="param__k-l">BPM</span>
+                <div class="mini-ops">
+                  <button class="icnbtn" id="bpmHalf" type="button">÷2</button>
+                  <button class="icnbtn" id="bpmDouble" type="button">×2</button>
+                </div>
+              </div>
+              <div class="param__row">
+                <div class="param__v" id="bpmVal">124</div>
+                <div class="steppers">
+                  <button class="icnbtn" id="bpmMinus" type="button" aria-label="Decrease BPM">−</button>
+                  <button class="icnbtn" id="bpmPlus" type="button" aria-label="Increase BPM">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Style -->
+            <div class="param">
+              <div class="param__k"><span class="param__k-l">Style</span></div>
+              <div class="param__v param__v--editable" id="styleVal" role="button" tabindex="0" aria-haspopup="true">Up</div>
+              <div class="menu" id="styleMenu" role="menu">
+                <button data-val="Up" class="is-current">Up</button>
+                <button data-val="Down">Down</button>
+                <button data-val="UpDown">UpDown</button>
+                <button data-val="DownUp">DownUp</button>
+              </div>
+            </div>
+
+            <!-- Rate -->
+            <div class="param">
+              <div class="param__k"><span class="param__k-l">Rate</span></div>
+              <div class="param__v param__v--editable" id="rateVal" role="button" tabindex="0" aria-haspopup="true">1/16</div>
+              <div class="menu" id="rateMenu" role="menu">
+                <button data-val="1/4">1/4</button>
+                <button data-val="1/8">1/8</button>
+                <button data-val="1/16" class="is-current">1/16</button>
+                <button data-val="1/32">1/32</button>
+                <button data-val="1/4T">1/4T</button>
+                <button data-val="1/8T">1/8T</button>
+                <button data-val="1/16T">1/16T</button>
+                <button data-val="1/32T">1/32T</button>
+              </div>
+            </div>
+
+            <!-- Octaves -->
+            <div class="param">
+              <div class="param__k"><span class="param__k-l">Octaves</span></div>
+              <div class="param__row">
+                <div class="param__v" id="octVal">2</div>
+                <div class="steppers">
+                  <button class="icnbtn" id="octMinus" type="button" aria-label="Decrease octaves">−</button>
+                  <button class="icnbtn" id="octPlus" type="button" aria-label="Increase octaves">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Notes -->
+            <div class="param param--wide">
+              <div class="param__k">Input Notes</div>
+              <div class="chips" id="notesRow">
+                <!-- chips injected -->
+                <button class="chip-add" id="addNoteBtn" type="button" aria-label="Add note">+</button>
+              </div>
+            </div>
+
+            <!-- Detected Sequence -->
+            <div class="param param--wide">
+              <div class="param__k">Detected Sequence</div>
+              <div class="seq" id="seqRow"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== High confidence — dropdowns expanded (Tailwind) ===================== -->
+    <div class="stack">
+      <span class="stack__lbl">ResultPanel — high confidence, Style + Rate dropdowns open (Tailwind)</span>
+      <div class="w-[640px] rounded-[13px] bg-[#15120d] border border-[#2e2820]">
+        <div class="flex items-center justify-between px-4 py-[11px] border-b border-[#2e2820]">
+          <div class="flex items-center gap-[9px]">
+            <span class="font-mono text-[10px] tracking-[0.14em] text-[#0b0a08] bg-[#f5972a] px-1.5 py-0.5 rounded-[3px] font-semibold">04</span>
+            <span class="font-mono text-xs font-semibold tracking-[0.08em] text-[#f6f2ec]">RESULTS</span>
+          </div>
+        </div>
+        <div class="p-[18px]">
+          <div class="flex gap-2 mb-3.5">
+            <button type="button" data-play="source" class="playbtn-tw inline-flex items-center gap-2 font-mono text-xs px-[13px] py-2 rounded-[9px] bg-[#201b14] border border-[#2e2820] text-[#a99f90]"><span class="playbtn__ico">▶</span>Play Source</button>
+            <button type="button" data-play="modulation" class="playbtn-tw inline-flex items-center gap-2 font-mono text-xs px-[13px] py-2 rounded-[9px] bg-[#201b14] border border-[#2e2820] text-[#a99f90]"><span class="playbtn__ico">▶</span>Play Modulation</button>
+          </div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[15px] font-semibold text-[#f6f2ec]">Detected settings</span>
+            <span class="inline-flex items-center gap-2 px-3 py-[7px] rounded-[9px] text-xs font-medium border" style="border-color:color-mix(in oklab, #5cc98a 45%, #2e2820); color:#5cc98a; background:color-mix(in oklab, #5cc98a 8%, transparent)">
+              <span class="w-2 h-2 rounded-[2px] bg-[#5cc98a]"></span>
+              <span class="font-mono tracking-[0.02em]">High confidence</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="rounded-[9px] bg-[#201b14] border border-[#2e2820] p-[13px_14px]">
+              <div class="flex items-center justify-between gap-1.5 mb-2">
+                <span class="font-mono text-[10px] tracking-[0.1em] uppercase text-[#6c6252]">BPM</span>
+                <div class="flex items-center gap-1.5">
+                  <button class="font-mono text-[10px] px-[7px] h-[22px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#a99f90]">÷2</button>
+                  <button class="font-mono text-[10px] px-[7px] h-[22px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#a99f90]">×2</button>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="font-mono text-[22px] font-medium text-[#f6f2ec]">124</div>
+                <div class="flex items-center gap-2">
+                  <button class="w-[26px] h-[26px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#a99f90] text-[13px]">−</button>
+                  <button class="w-[26px] h-[26px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#a99f90] text-[13px]">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-[9px] bg-[#201b14] border border-[#2e2820] p-[13px_14px]">
+              <div class="mb-2">
+                <span class="font-mono text-[10px] tracking-[0.1em] uppercase text-[#6c6252]">Style</span>
+              </div>
+              <div class="relative inline-block">
+                <div class="font-mono text-[22px] font-medium text-[#f5972a] cursor-pointer">Up</div>
+                <div class="absolute z-20 top-full left-0 mt-1.5 bg-[#201b14] border border-[#2e2820] rounded-[5px] shadow-[0_10px_24px_-8px_rgba(0,0,0,0.5)] flex flex-col p-1 min-w-[108px]">
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f5972a]">Up</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">Down</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">UpDown</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">DownUp</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-[9px] bg-[#201b14] border border-[#2e2820] p-[13px_14px]">
+              <div class="mb-2">
+                <span class="font-mono text-[10px] tracking-[0.1em] uppercase text-[#6c6252]">Rate</span>
+              </div>
+              <div class="relative inline-block">
+                <div class="font-mono text-[22px] font-medium text-[#f5972a] cursor-pointer">1/16</div>
+                <div class="absolute z-20 top-full left-0 mt-1.5 bg-[#201b14] border border-[#2e2820] rounded-[5px] shadow-[0_10px_24px_-8px_rgba(0,0,0,0.5)] flex flex-col p-1 min-w-[108px]">
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/4</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/8</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f5972a]">1/16</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/32</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/4T</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/8T</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/16T</button>
+                  <button class="text-left font-mono text-[12.5px] px-[9px] py-[7px] rounded text-[#f6f2ec] hover:bg-[#f5972a]/10">1/32T</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-[9px] bg-[#201b14] border border-[#2e2820] p-[13px_14px]">
+              <div class="mb-2">
+                <span class="font-mono text-[10px] tracking-[0.1em] uppercase text-[#6c6252]">Octaves</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="font-mono text-[22px] font-medium text-[#f6f2ec]">2</div>
+                <div class="flex items-center gap-2">
+                  <button class="w-[26px] h-[26px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#a99f90] text-[13px]">−</button>
+                  <button class="w-[26px] h-[26px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#a99f90] text-[13px]">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-2 rounded-[9px] bg-[#201b14] border border-[#2e2820] p-[13px_14px]">
+              <div class="font-mono text-[10px] tracking-[0.1em] uppercase text-[#6c6252] mb-2">Input Notes</div>
+              <div class="flex flex-wrap gap-1.5 items-center">
+                <button class="font-mono text-sm font-medium px-[11px] py-[5px] rounded-[5px] bg-[#f5972a]/15 border border-[#f5972a]/35 text-[#f5972a]">C</button>
+                <button class="font-mono text-sm font-medium px-[11px] py-[5px] rounded-[5px] bg-[#f5972a]/15 border border-[#f5972a]/35 text-[#f5972a]">D#</button>
+                <div class="relative inline-block">
+                  <button class="font-mono text-sm font-medium px-[11px] py-[5px] rounded-[5px] bg-[#f5972a]/15 border border-[#f5972a]/35 text-[#f5972a]">G</button>
+                  <div class="absolute z-20 top-full left-0 mt-1.5 bg-[#201b14] border border-[#2e2820] rounded-[5px] shadow-[0_10px_24px_-8px_rgba(0,0,0,0.5)] p-1.5 w-[168px]">
+                    <div class="grid grid-cols-4 gap-1">
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">C</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">C#</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">D</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">D#</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">E</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">F</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">F#</button>
+                      <button class="font-mono text-xs border border-[#f5972a] text-[#f5972a] rounded py-1.5">G</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">G#</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">A</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">A#</button>
+                      <button class="font-mono text-xs bg-[#15120d] border border-[#2e2820] text-[#f6f2ec] rounded py-1.5">B</button>
+                    </div>
+                    <button class="mt-1.5 w-full text-center bg-transparent text-[#ec6a6a] font-mono text-[11.5px] py-[7px] border-t border-[#2e2820]">Delete</button>
+                  </div>
+                </div>
+                <button class="w-7 h-7 rounded-[5px] bg-[#15120d] border border-dashed border-[#2e2820] text-[#a99f90] flex items-center justify-center text-[15px]">+</button>
+              </div>
+            </div>
+
+            <div class="col-span-2 rounded-[9px] bg-[#201b14] border border-[#2e2820] p-[13px_14px]">
+              <div class="font-mono text-[10px] tracking-[0.1em] uppercase text-[#6c6252] mb-2">Detected Sequence</div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="font-mono text-[13px] font-medium px-2.5 py-[6px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#f6f2ec]"><b class="text-[#f5972a] font-semibold">C2</b></span>
+                <span class="font-mono text-[13px] font-medium px-2.5 py-[6px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#f6f2ec]">D#2</span>
+                <span class="font-mono text-[13px] font-medium px-2.5 py-[6px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#f6f2ec]">G2</span>
+                <span class="font-mono text-[13px] font-medium px-2.5 py-[6px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#f6f2ec]">C3</span>
+                <span class="font-mono text-[13px] font-medium px-2.5 py-[6px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#f6f2ec]">D#3</span>
+                <span class="font-mono text-[13px] font-medium px-2.5 py-[6px] rounded-[5px] bg-[#15120d] border border-[#2e2820] text-[#f6f2ec]">G3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== Partial result ===================== -->
+    <div class="stack">
+      <span class="stack__lbl">ResultPanel — partial result</span>
+      <div class="card">
+        <div class="card__strip">
+          <div class="card__id"><span class="card__num">04</span><span class="card__title">RESULTS</span></div>
+        </div>
+        <div class="card__body">
+          <div class="playbar">
+            <button class="playbtn" type="button" data-play="source"><span class="playbtn__ico">▶</span>Play Source</button>
+            <button class="playbtn" type="button" data-play="modulation"><span class="playbtn__ico">▶</span>Play Modulation</button>
+          </div>
+          <div class="confrow">
+            <span class="confrow__title">Detected settings</span>
+            <span class="conf conf--md"><span class="conf__dot"></span><span class="conf__lbl">Medium confidence</span></span>
+          </div>
+
+          <div class="grid">
+            <div class="param">
+              <div class="param__k"><span class="param__k-l">BPM</span></div>
+              <div class="param__row">
+                <div class="param__v">124</div>
+                <div class="steppers">
+                  <button class="icnbtn" type="button" aria-label="Decrease BPM">−</button>
+                  <button class="icnbtn" type="button" aria-label="Increase BPM">+</button>
+                </div>
+              </div>
+            </div>
+            <div class="param">
+              <div class="param__k"><span class="param__k-l">Style</span></div>
+              <div class="param__v param__v--nd param__v--editable" role="button" tabindex="0">Not detected</div>
+            </div>
+            <div class="param">
+              <div class="param__k">
+                <span class="param__k-l">Rate</span>
+              </div>
+              <div class="param__v param__v--editable" role="button" tabindex="0">1/16</div>
+            </div>
+            <div class="param">
+              <div class="param__k"><span class="param__k-l">Octaves</span></div>
+              <div class="param__row">
+                <div class="param__v">2</div>
+                <div class="steppers">
+                  <button class="icnbtn" type="button" aria-label="Decrease octaves">−</button>
+                  <button class="icnbtn" type="button" aria-label="Increase octaves">+</button>
+                </div>
+              </div>
+            </div>
+            <div class="param param--wide">
+              <div class="param__k">Input Notes</div>
+              <div class="chips">
+                <button class="chip" type="button">C</button>
+                <button class="chip" type="button">E</button>
+                <button class="chip" type="button">G</button>
+                <button class="chip-add" type="button" aria-label="Add note">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+        let notes = ['C', 'D#', 'G'];
+        let bpm = 124.0;
+        let octaves = 2;
+        const RATES = ['1/4','1/8','1/16','1/32','1/4T','1/8T','1/16T','1/32T'];
+        let rate = '1/16';
+        let style = 'Up';
+
+        const notesRow = document.getElementById('notesRow');
+        const addNoteBtn = document.getElementById('addNoteBtn');
+        const seqRow = document.getElementById('seqRow');
+
+        function closeAllMenus(except) {
+          document.querySelectorAll('.menu.is-open, .note-menu.is-open').forEach(m => { if (m !== except) m.classList.remove('is-open'); });
+        }
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.chip-wrap') && !e.target.closest('.chip-add') && !e.target.closest('.param__k')) closeAllMenus();
+        });
+
+        function renderNotes() {
+          notesRow.innerHTML = '';
+          notes.forEach((n, i) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'chip-wrap';
+            const btn = document.createElement('button');
+            btn.className = 'chip'; btn.type = 'button'; btn.textContent = n;
+            const menu = document.createElement('div');
+            menu.className = 'note-menu';
+            const grid = document.createElement('div');
+            grid.className = 'note-menu__grid';
+            NOTES.forEach(opt => {
+              const o = document.createElement('button');
+              o.textContent = opt; o.type = 'button';
+              o.addEventListener('click', () => { notes[i] = opt; renderNotes(); renderSeq(); });
+              grid.appendChild(o);
+            });
+            const del = document.createElement('button');
+            del.className = 'note-menu__del'; del.type = 'button'; del.textContent = 'Delete';
+            del.addEventListener('click', () => { notes.splice(i, 1); renderNotes(); renderSeq(); });
+            menu.appendChild(grid); menu.appendChild(del);
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const open = menu.classList.contains('is-open'); closeAllMenus(); if (!open) menu.classList.add('is-open'); });
+            wrap.appendChild(btn); wrap.appendChild(menu);
+            notesRow.appendChild(wrap);
+          });
+          notesRow.appendChild(addNoteBtn);
+        }
+        addNoteBtn.addEventListener('click', () => { notes.push('C'); renderNotes(); renderSeq(); });
+
+        function renderSeq() {
+          seqRow.innerHTML = '';
+          if (!notes.length) return;
+          const seq = [];
+          for (let o = 0; o < Math.max(1, octaves); o++) {
+            notes.forEach(n => seq.push(n + (2 + o)));
+          }
+          seq.forEach((n, i) => {
+            const el = document.createElement('span');
+            el.className = 'seq__note';
+            el.innerHTML = i === 0 ? '<b>' + n + '</b>' : n;
+            seqRow.appendChild(el);
+          });
+        }
+        renderNotes(); renderSeq();
+
+        // BPM steppers + x2/÷2
+        const bpmVal = document.getElementById('bpmVal');
+        function renderBpm() { bpmVal.textContent = Math.round(bpm); }
+        document.getElementById('bpmMinus').addEventListener('click', () => { bpm = Math.max(20, bpm - 1); renderBpm(); });
+        document.getElementById('bpmPlus').addEventListener('click', () => { bpm = Math.min(300, bpm + 1); renderBpm(); });
+
+        const rateIdx = () => RATES.indexOf(rate);
+        function updateRateButtons() {
+          document.getElementById('bpmHalf').disabled = bpm / 2 < 20;
+          document.getElementById('bpmDouble').disabled = bpm * 2 > 300;
+        }
+        document.getElementById('bpmHalf').addEventListener('click', () => { if (bpm / 2 >= 20) { bpm = bpm / 2; renderBpm(); updateRateButtons(); } });
+        document.getElementById('bpmDouble').addEventListener('click', () => { if (bpm * 2 <= 300) { bpm = bpm * 2; renderBpm(); updateRateButtons(); } });
+        updateRateButtons();
+
+        // Octaves steppers
+        const octVal = document.getElementById('octVal');
+        document.getElementById('octMinus').addEventListener('click', () => { octaves = Math.max(1, octaves - 1); octVal.textContent = octaves; renderSeq(); });
+        document.getElementById('octPlus').addEventListener('click', () => { octaves = Math.min(4, octaves + 1); octVal.textContent = octaves; renderSeq(); });
+
+        // Style + Rate dropdown menus
+        function wireMenu(btnId, menuId, valEl, onPick) {
+          const btn = document.getElementById(btnId);
+          const menu = document.getElementById(menuId);
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const open = menu.classList.contains('is-open');
+            closeAllMenus();
+            if (!open) menu.classList.add('is-open');
+          });
+          menu.querySelectorAll('button').forEach(b => {
+            b.addEventListener('click', () => {
+              menu.querySelectorAll('button').forEach(x => x.classList.remove('is-current'));
+              b.classList.add('is-current');
+              valEl.textContent = b.dataset.val;
+              onPick(b.dataset.val);
+              menu.classList.remove('is-open');
+            });
+          });
+        }
+        wireMenu('styleVal', 'styleMenu', document.getElementById('styleVal'), (v) => { style = v; });
+        wireMenu('rateVal', 'rateMenu', document.getElementById('rateVal'), (v) => { rate = v; });
+
+        // Play Source / Play Modulation — only one active at a time, per card
+        const playGroups = new Map();
+        document.querySelectorAll('[data-play]').forEach(b => {
+          const g = b.parentElement;
+          if (!playGroups.has(g)) playGroups.set(g, []);
+          playGroups.get(g).push(b);
+        });
+        function paint(btn, on) {
+          btn.classList.toggle('is-playing', on);
+          const ico = btn.querySelector('.playbtn__ico');
+          if (ico) ico.textContent = on ? '❚❚' : '▶';
+        }
+        playGroups.forEach(group => {
+          group.forEach(b => b.addEventListener('click', () => {
+            const wasOn = b.classList.contains('is-playing');
+            group.forEach(x => paint(x, false));
+            paint(b, !wasOn);
+          }));
+        });
+      })();
+    </script>
+  </body>
+</html>

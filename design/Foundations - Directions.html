@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="design_doc_mode" content="canvas" />
+<title>ArpLens — Foundation Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #17181a; font-family: "Geist", system-ui, sans-serif; }
+
+  /* ---- Frame shell ---- */
+  .frame {
+    position: absolute;
+    top: 48px;
+    width: 640px;
+    background: var(--bg-0);
+    color: var(--text-hi);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    font-family: var(--font-sans);
+  }
+  .frame__label {
+    position: absolute;
+    top: -34px;
+    left: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: "Geist Mono", monospace;
+    color: #8a8d92;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .frame__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    background: #2a2b2e;
+    color: #e6e7e9;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  /* ---- Section scaffolding ---- */
+  .sec { padding: 22px 26px; border-top: 1px solid var(--line); }
+  .sec:first-of-type { border-top: none; }
+  .sec__k {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-lo);
+    margin-bottom: 16px;
+  }
+
+  /* ---- Intro block ---- */
+  .intro { padding: 26px; background: var(--bg-1); }
+  .intro__name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .intro__desc { margin-top: 6px; font-size: 13.5px; line-height: 1.55; color: var(--text-mid); max-width: 42ch; }
+  .intro__accentline { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+  .intro__swatch { width: 26px; height: 26px; border-radius: 6px; background: var(--accent); box-shadow: 0 0 0 1px var(--line), 0 0 22px -4px var(--accent); }
+  .intro__accentmeta { font-family: var(--font-mono); font-size: 11px; color: var(--text-mid); }
+  .intro__accentmeta b { color: var(--text-hi); font-weight: 500; }
+
+  /* ---- Applied header showcase ---- */
+  .app {
+    margin: 0 26px 22px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .app__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  .app__mark { display: flex; align-items: center; gap: 9px; }
+  .app__glyph { width: 16px; height: 16px; position: relative; }
+  .app__glyph i {
+    position: absolute; bottom: 0; width: 2px; border-radius: 1px; background: var(--accent);
+  }
+  .app__glyph i:nth-child(1){ left:0; height:6px; }
+  .app__glyph i:nth-child(2){ left:4px; height:14px; }
+  .app__glyph i:nth-child(3){ left:8px; height:9px; }
+  .app__glyph i:nth-child(4){ left:12px; height:12px; }
+  .app__word { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; }
+  .app__status { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; color: var(--text-lo); letter-spacing: 0.05em; }
+  .app__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sem-green); box-shadow: 0 0 8px -1px var(--sem-green); }
+  .app__hero { padding: 40px 28px 44px; text-align: center; }
+  .app__title { font-size: 40px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+  .app__title b { color: var(--accent); font-weight: 600; }
+  .app__headline { margin-top: 16px; font-size: 16px; color: var(--text-hi); }
+  .app__sub { margin: 8px auto 0; max-width: 34ch; font-size: 13px; line-height: 1.5; color: var(--text-mid); }
+  .app__cta {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 24px;
+    padding: 10px 18px; border-radius: var(--r-md);
+    background: var(--accent); color: var(--bg-0);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+    cursor: default;
+  }
+
+  /* ---- Color swatches ---- */
+  .colors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .sw { border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+  .sw__chip { height: 40px; }
+  .sw__meta { padding: 6px 8px; background: var(--bg-1); }
+  .sw__role { font-size: 10.5px; color: var(--text-mid); }
+  .sw__hex { font-family: var(--font-mono); font-size: 10px; color: var(--text-lo); }
+
+  /* ---- Type scale ---- */
+  .type__row { display: flex; align-items: baseline; gap: 14px; padding: 7px 0; border-top: 1px dashed var(--line); }
+  .type__row:first-child { border-top: none; }
+  .type__tag { flex: 0 0 96px; font-family: var(--font-mono); font-size: 10px; color: var(--text-lo); }
+  .type__ex { color: var(--text-hi); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .type__mono { font-family: var(--font-mono); }
+
+  /* ---- Spacing + radii ---- */
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .space__scale { display: flex; align-items: flex-end; gap: 6px; height: 48px; }
+  .space__bar { background: var(--accent); opacity: 0.85; border-radius: 2px 2px 0 0; width: 14px; }
+  .space__labels { display: flex; gap: 6px; margin-top: 6px; }
+  .space__labels span { width: 14px; text-align: center; font-family: var(--font-mono); font-size: 8.5px; color: var(--text-lo); }
+  .radii { display: flex; gap: 12px; }
+  .radii__item { text-align: center; }
+  .radii__box { width: 44px; height: 44px; border: 1px solid var(--accent); background: var(--bg-2); }
+  .radii__lbl { margin-top: 6px; font-family: var(--font-mono); font-size: 9px; color: var(--text-lo); }
+
+  /* ---- Semantics: confidence + not-detected ---- */
+  .badges { display: flex; flex-wrap: wrap; gap: 10px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-radius: var(--r-md);
+    font-size: 12px; font-weight: 500;
+    border: 1px solid; background: var(--bg-1);
+  }
+  .badge__dot { width: 8px; height: 8px; border-radius: 2px; }
+  .badge__lbl { font-family: var(--font-mono); letter-spacing: 0.02em; }
+  .badge--hi   { border-color: color-mix(in oklab, var(--sem-green) 45%, var(--line)); color: var(--sem-green); }
+  .badge--hi .badge__dot { background: var(--sem-green); }
+  .badge--md   { border-color: color-mix(in oklab, var(--sem-yellow) 45%, var(--line)); color: var(--sem-yellow); }
+  .badge--md .badge__dot { background: var(--sem-yellow); }
+  .badge--lo   { border-color: color-mix(in oklab, var(--sem-red) 45%, var(--line)); color: var(--sem-red); }
+  .badge--lo .badge__dot { background: var(--sem-red); }
+
+  .nd {
+    margin-top: 14px;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    border: 1px dashed var(--line);
+    border-radius: var(--r-md);
+    background: repeating-linear-gradient(-45deg, transparent, transparent 7px, color-mix(in oklab, var(--line) 40%, transparent) 7px, color-mix(in oklab, var(--line) 40%, transparent) 8px), var(--bg-1);
+  }
+  .nd__val { font-family: var(--font-mono); font-size: 13px; color: var(--text-lo); }
+  .nd__tag { margin-left: auto; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-lo); padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; }
+
+  /* ---- musical value readout (mono showcase) ---- */
+  .readout { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+  .ro { display: flex; flex-direction: column; gap: 3px; }
+  .ro__k { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-lo); }
+  .ro__v { font-family: var(--font-mono); font-weight: 500; color: var(--text-hi); }
+  .ro__bpm { font-size: 32px; letter-spacing: -0.01em; line-height: 1; }
+  .ro__bpm small { font-size: 13px; color: var(--text-mid); font-weight: 400; margin-left: 4px; }
+  .ro__notes { font-size: 20px; }
+  .ro__notes b { color: var(--accent); font-weight: 500; }
+
+  /* focus specimen */
+  .focus { display: flex; gap: 12px; align-items: center; }
+  .focus__btn {
+    padding: 9px 16px; border-radius: var(--r-md);
+    background: var(--bg-2); color: var(--text-hi);
+    border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 12px; cursor: default;
+    outline: none;
+  }
+  .focus__btn--ring { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .focus__note { font-size: 11px; color: var(--text-lo); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+  <!-- =========================== DIRECTION A =========================== -->
+  <section id="1a" class="frame" style="left:48px;
+      --bg-0:#08090b; --bg-1:#101317; --bg-2:#191d23; --line:#262b32;
+      --text-hi:#f2f5f7; --text-mid:#98a2ac; --text-lo:#5b646d;
+      --accent:#22d3ee; --sem-green:#34d399; --sem-yellow:#fbbf24; --sem-red:#f87171;
+      --font-sans:'Geist',system-ui,sans-serif; --font-mono:'Geist Mono',monospace;
+      --r-sm:4px; --r-md:6px; --r-lg:9px;">
+    <div class="frame__label"><span class="frame__badge">1a</span> Cyan Console — clinical / cool</div>
+
+    <div class="intro">
+      <div class="intro__name">Cyan Console</div>
+      <p class="intro__desc">A clean-room modern DAW. Cool neutral blacks, tight corners, cyan signal accent. Reads as precise measurement software.</p>
+      <div class="intro__accentline">
+        <span class="intro__swatch"></span>
+        <span class="intro__accentmeta">accent <b>#22D3EE</b> · Geist / Geist Mono</span>
+      </div>
+    </div>
+
+    <div class="app">
+      <div class="app__bar">
+        <div class="app__mark"><span class="app__glyph"><i></i><i></i><i></i><i></i></span><span class="app__word">ARPLENS</span></div>
+        <div class="app__status"><span class="app__dot"></span> READY · v2.1</div>
+      </div>
+      <div class="app__hero">
+        <div class="app__title">Arp<b>Lens</b></div>
+        <p class="app__headline">Recreate standard arpeggios from audio.</p>
+        <p class="app__sub">Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW.</p>
+        <span class="app__cta">▲ Upload a loop</span>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Background layers · text hierarchy</div>
+      <div class="colors">
+        <div class="sw"><div class="sw__chip" style="background:#08090b"></div><div class="sw__meta"><div class="sw__role">bg / base</div><div class="sw__hex">#08090B</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#101317"></div><div class="sw__meta"><div class="sw__role">surface</div><div class="sw__hex">#101317</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#191d23"></div><div class="sw__meta"><div class="sw__role">raised</div><div class="sw__hex">#191D23</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#262b32"></div><div class="sw__meta"><div class="sw__role">line</div><div class="sw__hex">#262B32</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#f2f5f7"></div><div class="sw__meta"><div class="sw__role">text hi</div><div class="sw__hex">#F2F5F7</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#98a2ac"></div><div class="sw__meta"><div class="sw__role">text mid</div><div class="sw__hex">#98A2AC</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#5b646d"></div><div class="sw__meta"><div class="sw__role">text lo</div><div class="sw__hex">#5B646D</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#22d3ee"></div><div class="sw__meta"><div class="sw__role">accent</div><div class="sw__hex">#22D3EE</div></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Type scale</div>
+      <div class="type__row"><span class="type__tag">display / 40</span><span class="type__ex" style="font-size:34px;font-weight:600;letter-spacing:-0.03em">ArpLens</span></div>
+      <div class="type__row"><span class="type__tag">h2 / 20</span><span class="type__ex" style="font-size:20px;font-weight:600">Input Notes</span></div>
+      <div class="type__row"><span class="type__tag">body / 15</span><span class="type__ex" style="font-size:15px;color:var(--text-mid)">Detected arpeggiator settings</span></div>
+      <div class="type__row"><span class="type__tag">bpm / mono 32</span><span class="type__ex type__mono" style="font-size:30px;font-weight:500">124.0</span></div>
+      <div class="type__row"><span class="type__tag">notes / mono 20</span><span class="type__ex type__mono" style="font-size:20px">C# D# F# G A#</span></div>
+      <div class="type__row"><span class="type__tag">caption / mono 11</span><span class="type__ex type__mono" style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-lo)">RATE · 1/16</span></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Musical readout</div>
+      <div class="readout">
+        <div class="ro"><span class="ro__k">BPM</span><span class="ro__v ro__bpm">124<small>.0</small></span></div>
+        <div class="ro"><span class="ro__k">Notes</span><span class="ro__v ro__notes"><b>C#</b> D# F# G A#</span></div>
+        <div class="ro"><span class="ro__k">Rate</span><span class="ro__v" style="font-size:20px">1/16</span></div>
+        <div class="ro"><span class="ro__k">Octaves</span><span class="ro__v" style="font-size:20px">2</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="metrics">
+        <div>
+          <div class="sec__k">Spacing · 4px base</div>
+          <div class="space__scale">
+            <div class="space__bar" style="height:4px"></div><div class="space__bar" style="height:8px"></div><div class="space__bar" style="height:12px"></div><div class="space__bar" style="height:16px"></div><div class="space__bar" style="height:24px"></div><div class="space__bar" style="height:32px"></div><div class="space__bar" style="height:48px"></div>
+          </div>
+          <div class="space__labels"><span>4</span><span>8</span><span>12</span><span>16</span><span>24</span><span>32</span><span>48</span></div>
+        </div>
+        <div>
+          <div class="sec__k">Radii · tight</div>
+          <div class="radii">
+            <div class="radii__item"><div class="radii__box" style="border-radius:4px"></div><div class="radii__lbl">sm 4</div></div>
+            <div class="radii__item"><div class="radii__box" style="border-radius:6px"></div><div class="radii__lbl">md 6</div></div>
+            <div class="radii__item"><div class="radii__box" style="border-radius:9px"></div><div class="radii__lbl">lg 9</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Confidence · semantic states</div>
+      <div class="badges">
+        <span class="badge badge--hi"><span class="badge__dot"></span><span class="badge__lbl">High</span></span>
+        <span class="badge badge--md"><span class="badge__dot"></span><span class="badge__lbl">Medium</span></span>
+        <span class="badge badge--lo"><span class="badge__dot"></span><span class="badge__lbl">Low</span></span>
+      </div>
+      <div class="nd"><span class="nd__val">Octaves — Not detected</span><span class="nd__tag">no signal</span></div>
+      <div class="focus" style="margin-top:16px">
+        <button class="focus__btn focus__btn--ring">Analyze</button>
+        <span class="focus__note">← keyboard focus ring</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== DIRECTION B =========================== -->
+  <section id="1b" class="frame" style="left:736px;
+      --bg-0:#0b0a08; --bg-1:#15120d; --bg-2:#201b14; --line:#2e2820;
+      --text-hi:#f6f2ec; --text-mid:#a99f90; --text-lo:#6c6252;
+      --accent:#f5972a; --sem-green:#5cc98a; --sem-yellow:#e9c342; --sem-red:#ec6a6a;
+      --font-sans:'Archivo',system-ui,sans-serif; --font-mono:'JetBrains Mono',monospace;
+      --r-sm:5px; --r-md:9px; --r-lg:13px;">
+    <div class="frame__label"><span class="frame__badge">1b</span> Amber Rack — warm / tactile hardware</div>
+
+    <div class="intro">
+      <div class="intro__name">Amber Rack</div>
+      <p class="intro__desc">Vintage rack-gear warmth. Amber-tinted blacks, softer corners, an amber LED accent. Feels like the front panel of a hardware synth.</p>
+      <div class="intro__accentline">
+        <span class="intro__swatch"></span>
+        <span class="intro__accentmeta">accent <b>#F5972A</b> · Archivo / JetBrains Mono</span>
+      </div>
+    </div>
+
+    <div class="app">
+      <div class="app__bar">
+        <div class="app__mark"><span class="app__glyph"><i></i><i></i><i></i><i></i></span><span class="app__word">ARPLENS</span></div>
+        <div class="app__status"><span class="app__dot"></span> READY · v2.1</div>
+      </div>
+      <div class="app__hero">
+        <div class="app__title">Arp<b>Lens</b></div>
+        <p class="app__headline">Recreate standard arpeggios from audio.</p>
+        <p class="app__sub">Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW.</p>
+        <span class="app__cta">▲ Upload a loop</span>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Background layers · text hierarchy</div>
+      <div class="colors">
+        <div class="sw"><div class="sw__chip" style="background:#0b0a08"></div><div class="sw__meta"><div class="sw__role">bg / base</div><div class="sw__hex">#0B0A08</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#15120d"></div><div class="sw__meta"><div class="sw__role">surface</div><div class="sw__hex">#15120D</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#201b14"></div><div class="sw__meta"><div class="sw__role">raised</div><div class="sw__hex">#201B14</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#2e2820"></div><div class="sw__meta"><div class="sw__role">line</div><div class="sw__hex">#2E2820</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#f6f2ec"></div><div class="sw__meta"><div class="sw__role">text hi</div><div class="sw__hex">#F6F2EC</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#a99f90"></div><div class="sw__meta"><div class="sw__role">text mid</div><div class="sw__hex">#A99F90</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#6c6252"></div><div class="sw__meta"><div class="sw__role">text lo</div><div class="sw__hex">#6C6252</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#f5972a"></div><div class="sw__meta"><div class="sw__role">accent</div><div class="sw__hex">#F5972A</div></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Type scale</div>
+      <div class="type__row"><span class="type__tag">display / 40</span><span class="type__ex" style="font-size:34px;font-weight:700;letter-spacing:-0.02em">ArpLens</span></div>
+      <div class="type__row"><span class="type__tag">h2 / 20</span><span class="type__ex" style="font-size:20px;font-weight:600">Input Notes</span></div>
+      <div class="type__row"><span class="type__tag">body / 15</span><span class="type__ex" style="font-size:15px;color:var(--text-mid)">Detected arpeggiator settings</span></div>
+      <div class="type__row"><span class="type__tag">bpm / mono 32</span><span class="type__ex type__mono" style="font-size:30px;font-weight:500">124.0</span></div>
+      <div class="type__row"><span class="type__tag">notes / mono 20</span><span class="type__ex type__mono" style="font-size:20px">C# D# F# G A#</span></div>
+      <div class="type__row"><span class="type__tag">caption / mono 11</span><span class="type__ex type__mono" style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-lo)">RATE · 1/16</span></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Musical readout</div>
+      <div class="readout">
+        <div class="ro"><span class="ro__k">BPM</span><span class="ro__v ro__bpm">124<small>.0</small></span></div>
+        <div class="ro"><span class="ro__k">Notes</span><span class="ro__v ro__notes"><b>C#</b> D# F# G A#</span></div>
+        <div class="ro"><span class="ro__k">Rate</span><span class="ro__v" style="font-size:20px">1/16</span></div>
+        <div class="ro"><span class="ro__k">Octaves</span><span class="ro__v" style="font-size:20px">2</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="metrics">
+        <div>
+          <div class="sec__k">Spacing · 4px base</div>
+          <div class="space__scale">
+            <div class="space__bar" style="height:4px"></div><div class="space__bar" style="height:8px"></div><div class="space__bar" style="height:12px"></div><div class="space__bar" style="height:16px"></div><div class="space__bar" style="height:24px"></div><div class="space__bar" style="height:32px"></div><div class="space__bar" style="height:48px"></div>
+          </div>
+          <div class="space__labels"><span>4</span><span>8</span><span>12</span><span>16</span><span>24</span><span>32</span><span>48</span></div>
+        </div>
+        <div>
+          <div class="sec__k">Radii · soft</div>
+          <div class="radii">
+            <div class="radii__item"><div class="radii__box" style="border-radius:5px"></div><div class="radii__lbl">sm 5</div></div>
+            <div class="radii__item"><div class="radii__box" style="border-radius:9px"></div><div class="radii__lbl">md 9</div></div>
+            <div class="radii__item"><div class="radii__box" style="border-radius:13px"></div><div class="radii__lbl">lg 13</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Confidence · semantic states</div>
+      <div class="badges">
+        <span class="badge badge--hi"><span class="badge__dot"></span><span class="badge__lbl">High</span></span>
+        <span class="badge badge--md"><span class="badge__dot"></span><span class="badge__lbl">Medium</span></span>
+        <span class="badge badge--lo"><span class="badge__dot"></span><span class="badge__lbl">Low</span></span>
+      </div>
+      <div class="nd"><span class="nd__val">Octaves — Not detected</span><span class="nd__tag">no signal</span></div>
+      <div class="focus" style="margin-top:16px">
+        <button class="focus__btn focus__btn--ring">Analyze</button>
+        <span class="focus__note">← keyboard focus ring</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== DIRECTION C =========================== -->
+  <section id="1c" class="frame" style="left:1424px;
+      --bg-0:#09080c; --bg-1:#121017; --bg-2:#1b1823; --line:#2a2633;
+      --text-hi:#f4f2f7; --text-mid:#a099ad; --text-lo:#635c70;
+      --accent:#a78bfa; --sem-green:#34d399; --sem-yellow:#fbbf24; --sem-red:#f87171;
+      --font-sans:'Space Grotesk',system-ui,sans-serif; --font-mono:'IBM Plex Mono',monospace;
+      --r-sm:4px; --r-md:8px; --r-lg:12px;">
+    <div class="frame__label"><span class="frame__badge">1c</span> Violet Lab — cool / modern analyzer</div>
+
+    <div class="intro">
+      <div class="intro__name">Violet Lab</div>
+      <p class="intro__desc">A modern signal-analysis lab. Cool violet-black, medium corners, an electric violet accent kept well clear of the semantic red/yellow/green.</p>
+      <div class="intro__accentline">
+        <span class="intro__swatch"></span>
+        <span class="intro__accentmeta">accent <b>#A78BFA</b> · Space Grotesk / IBM Plex Mono</span>
+      </div>
+    </div>
+
+    <div class="app">
+      <div class="app__bar">
+        <div class="app__mark"><span class="app__glyph"><i></i><i></i><i></i><i></i></span><span class="app__word">ARPLENS</span></div>
+        <div class="app__status"><span class="app__dot"></span> READY · v2.1</div>
+      </div>
+      <div class="app__hero">
+        <div class="app__title">Arp<b>Lens</b></div>
+        <p class="app__headline">Recreate standard arpeggios from audio.</p>
+        <p class="app__sub">Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW.</p>
+        <span class="app__cta">▲ Upload a loop</span>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Background layers · text hierarchy</div>
+      <div class="colors">
+        <div class="sw"><div class="sw__chip" style="background:#09080c"></div><div class="sw__meta"><div class="sw__role">bg / base</div><div class="sw__hex">#09080C</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#121017"></div><div class="sw__meta"><div class="sw__role">surface</div><div class="sw__hex">#121017</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#1b1823"></div><div class="sw__meta"><div class="sw__role">raised</div><div class="sw__hex">#1B1823</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#2a2633"></div><div class="sw__meta"><div class="sw__role">line</div><div class="sw__hex">#2A2633</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#f4f2f7"></div><div class="sw__meta"><div class="sw__role">text hi</div><div class="sw__hex">#F4F2F7</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#a099ad"></div><div class="sw__meta"><div class="sw__role">text mid</div><div class="sw__hex">#A099AD</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#635c70"></div><div class="sw__meta"><div class="sw__role">text lo</div><div class="sw__hex">#635C70</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#a78bfa"></div><div class="sw__meta"><div class="sw__role">accent</div><div class="sw__hex">#A78BFA</div></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Type scale</div>
+      <div class="type__row"><span class="type__tag">display / 40</span><span class="type__ex" style="font-size:34px;font-weight:600;letter-spacing:-0.02em">ArpLens</span></div>
+      <div class="type__row"><span class="type__tag">h2 / 20</span><span class="type__ex" style="font-size:20px;font-weight:600">Input Notes</span></div>
+      <div class="type__row"><span class="type__tag">body / 15</span><span class="type__ex" style="font-size:15px;color:var(--text-mid)">Detected arpeggiator settings</span></div>
+      <div class="type__row"><span class="type__tag">bpm / mono 32</span><span class="type__ex type__mono" style="font-size:30px;font-weight:500">124.0</span></div>
+      <div class="type__row"><span class="type__tag">notes / mono 20</span><span class="type__ex type__mono" style="font-size:20px">C# D# F# G A#</span></div>
+      <div class="type__row"><span class="type__tag">caption / mono 11</span><span class="type__ex type__mono" style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-lo)">RATE · 1/16</span></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Musical readout</div>
+      <div class="readout">
+        <div class="ro"><span class="ro__k">BPM</span><span class="ro__v ro__bpm">124<small>.0</small></span></div>
+        <div class="ro"><span class="ro__k">Notes</span><span class="ro__v ro__notes"><b>C#</b> D# F# G A#</span></div>
+        <div class="ro"><span class="ro__k">Rate</span><span class="ro__v" style="font-size:20px">1/16</span></div>
+        <div class="ro"><span class="ro__k">Octaves</span><span class="ro__v" style="font-size:20px">2</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="metrics">
+        <div>
+          <div class="sec__k">Spacing · 4px base</div>
+          <div class="space__scale">
+            <div class="space__bar" style="height:4px"></div><div class="space__bar" style="height:8px"></div><div class="space__bar" style="height:12px"></div><div class="space__bar" style="height:16px"></div><div class="space__bar" style="height:24px"></div><div class="space__bar" style="height:32px"></div><div class="space__bar" style="height:48px"></div>
+          </div>
+          <div class="space__labels"><span>4</span><span>8</span><span>12</span><span>16</span><span>24</span><span>32</span><span>48</span></div>
+        </div>
+        <div>
+          <div class="sec__k">Radii · medium</div>
+          <div class="radii">
+            <div class="radii__item"><div class="radii__box" style="border-radius:4px"></div><div class="radii__lbl">sm 4</div></div>
+            <div class="radii__item"><div class="radii__box" style="border-radius:8px"></div><div class="radii__lbl">md 8</div></div>
+            <div class="radii__item"><div class="radii__box" style="border-radius:12px"></div><div class="radii__lbl">lg 12</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec__k">Confidence · semantic states</div>
+      <div class="badges">
+        <span class="badge badge--hi"><span class="badge__dot"></span><span class="badge__lbl">High</span></span>
+        <span class="badge badge--md"><span class="badge__dot"></span><span class="badge__lbl">Medium</span></span>
+        <span class="badge badge--lo"><span class="badge__dot"></span><span class="badge__lbl">Low</span></span>
+      </div>
+      <div class="nd"><span class="nd__val">Octaves — Not detected</span><span class="nd__tag">no signal</span></div>
+      <div class="focus" style="margin-top:16px">
+        <button class="focus__btn focus__btn--ring">Analyze</button>
+        <span class="focus__note">← keyboard focus ring</span>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

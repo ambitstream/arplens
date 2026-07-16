@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArpLens</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-0); color: var(--text-hi); font-family: var(--font-sans); }
+
+      /* global header bar */
+      .bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+      .mark { display: flex; align-items: center; gap: 9px; }
+      .mark img { width: 22px; height: 22px; display: block; }
+      .word { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; }
+      .status { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; color: var(--text-lo); letter-spacing: 0.05em; }
+      .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sem-green); box-shadow: 0 0 8px -1px var(--sem-green); }
+
+      main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 24px 48px; gap: 28px; }
+
+      .hero { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; max-width: 30rem; }
+      .brand { display: flex; align-items: center; gap: 10px; }
+      .brand__mark { width: 48px; height: 48px; display: block; }
+      h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.025em; }
+      h1 b { color: var(--accent); font-weight: 600; }
+      .headline { font-size: 1rem; color: var(--text-hi); }
+      .subtitle { font-size: 0.8125rem; color: var(--text-mid); }
+
+      /* upload card, matching UploadCard component */
+      .card { position: relative; width: 500px; max-width: 100%; border-radius: var(--r-lg);
+        background: linear-gradient(180deg, color-mix(in oklab, var(--bg-2) 60%, transparent), transparent 90px), var(--bg-1);
+        border: 1px solid var(--line); overflow: hidden; }
+      .card__strip { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+      .card__id { display: flex; align-items: center; gap: 9px; }
+      .card__num { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bg-0); background: var(--accent); padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+      .card__title { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-hi); }
+      .card__hint { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--text-lo); }
+      .card__body { padding: 16px; }
+
+      .drop { position: relative; border: 1.5px dashed var(--line); border-radius: var(--r-md); padding: 44px 24px 40px;
+        display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center;
+        transition: border-color 160ms ease, background 160ms ease; }
+      .drop:hover, .drop:focus-within { border-color: color-mix(in oklab, var(--accent) 70%, var(--line)); background: color-mix(in oklab, var(--accent) 5%, transparent); }
+      .corner { position: absolute; width: 12px; height: 12px; border: 1.5px solid var(--text-lo); opacity: 0.5; }
+      .corner--tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+      .corner--tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+      .corner--bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+      .corner--br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+      .drop__icon { width: 58px; height: 58px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line);
+        display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 6px color-mix(in oklab, var(--bg-1) 60%, transparent); }
+      .drop__icon svg { display: block; }
+      .drop__title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+      .drop__sub { font-size: 13px; color: var(--text-mid); margin-top: 4px; }
+      .drop__browse { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--r-md);
+        background: var(--accent); color: var(--bg-0); font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+        letter-spacing: 0.02em; border: none; cursor: pointer; transition: filter 140ms ease; }
+      .drop__browse:hover { filter: brightness(1.08); }
+      .drop__browse:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+      .drop__formats { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em; color: var(--text-lo);
+        display: flex; align-items: center; gap: 8px; }
+      .drop__formats b { color: var(--text-mid); font-weight: 500; }
+      .drop__formats span { opacity: 0.4; }
+
+      /* global footer */
+      .foot { width: 100%; display: flex; align-items: center; justify-content: center; padding: 16px 18px;
+        border-top: 1px solid var(--line); background: var(--bg-2); font-family: var(--font-mono); font-size: 11px;
+        letter-spacing: 0.03em; color: var(--text-lo); }
+      .foot a { color: var(--text-mid); text-decoration: none; }
+      .foot a:hover { color: var(--accent); }
+      .sandbox-link { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.02em; color: var(--text-mid); text-decoration: none; border-bottom: 1px dashed var(--text-lo); padding-bottom: 1px; margin-top: -8px; }
+      .sandbox-link:hover { color: var(--accent); border-color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <div class="mark"><img src="assets/logo.svg" alt="ArpLens" /><span class="word">ARPLENS</span></div>
+      <div class="status"><span class="dot"></span> READY · v2.1</div>
+    </div>
+
+    <main>
+      <div class="hero">
+        <div class="brand">
+          <img src="assets/logo.svg" alt="" class="brand__mark" />
+          <h1>Arp<b>Lens</b></h1>
+        </div>
+        <p class="headline">Recreate standard arpeggios from audio.</p>
+        <p class="subtitle">Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW.</p>
+      </div>
+
+      <div class="card">
+        <div class="card__strip">
+          <div class="card__id"><span class="card__num">01</span><span class="card__title">INPUT</span></div>
+          <span class="card__hint">AWAITING SIGNAL</span>
+        </div>
+        <div class="card__body">
+          <div class="drop" tabindex="0">
+            <span class="corner corner--tl"></span><span class="corner corner--tr"></span>
+            <span class="corner corner--bl"></span><span class="corner corner--br"></span>
+            <div class="drop__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3.5v11M12 3.5 7 8.5M12 3.5l5 5" stroke="#f5972a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4.5 17v1.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V17" stroke="#a99f90" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="drop__title">Drop an audio file here</div>
+              <div class="drop__sub">or</div>
+            </div>
+            <button class="drop__browse" type="button">Click to browse</button>
+            <div class="drop__formats"><b>MP3</b><span>/</span><b>WAV</b><span>/</span><b>M4A</b></div>
+          </div>
+        </div>
+      </div>
+
+      <a class="sandbox-link" href="Home Page - Sandbox.html">Go to Arpeggio Sandbox</a>
+    </main>
+
+    <div class="foot">© 2026 ArpLens. Open source on&nbsp;<a href="https://github.com" target="_blank" rel="noopener">GitHub</a>.</div>
+  </body>
+</html>

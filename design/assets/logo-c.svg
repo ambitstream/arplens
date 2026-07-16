@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+
+  <defs>
+    <clipPath id="lensC"><circle cx="220" cy="220" r="152"></circle></clipPath>
+  </defs>
+  <circle cx="220" cy="220" r="152" fill="#15120d"></circle>
+  <g clip-path="url(#lensC)">
+
+    <g fill="#f5972a">
+      <rect x="96" y="250" width="72" height="72" rx="12"></rect>
+      <rect x="184" y="184" width="72" height="72" rx="12"></rect>
+      <rect x="272" y="118" width="72" height="72" rx="12"></rect>
+    </g>
+  </g>
+  <circle cx="220" cy="220" r="152" fill="none" stroke="#f6f2ec" stroke-width="24"></circle>
+  <line x1="330" y1="330" x2="448" y2="448" stroke="#f6f2ec" stroke-width="44" stroke-linecap="round"></line>
+</svg>

@@ -4,15 +4,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Header — current placeholder (M1)</title>
+    <title>Header — Amber Rack</title>
+    <link rel="stylesheet" href="../styles.css" />
     <style>
-      :root {
-        color-scheme: dark;
-      }
-      * {
-        margin: 0;
-        box-sizing: border-box;
-      }
+      * { margin: 0; box-sizing: border-box; }
       body {
         min-height: 100vh;
         display: flex;
@@ -20,30 +15,56 @@
         align-items: center;
         justify-content: center;
         gap: 0.75rem;
-        background: #0a0a0a;
-        color: #f5f5f5;
-        font-family: system-ui, sans-serif;
+        background: var(--bg-0);
+        color: var(--text-hi);
+        font-family: var(--font-sans);
         padding: 0 1.5rem;
         text-align: center;
       }
+      .bar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 18px;
+        border-bottom: 1px solid var(--line);
+        background: var(--bg-2);
+      }
+      .mark { display: flex; align-items: center; gap: 9px; }
+      .mark img { width: 22px; height: 22px; display: block; }
+      .word { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; }
+      .status { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; color: var(--text-lo); letter-spacing: 0.05em; }
+      .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sem-green); box-shadow: 0 0 8px -1px var(--sem-green); }
+      .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+      .brand__mark { width: 40px; height: 40px; display: block; }
+      .brand__word { display: none; }
       h1 {
         font-size: 2.25rem;
         font-weight: 600;
         letter-spacing: -0.025em;
       }
+      h1 b { color: var(--accent); font-weight: 600; }
       .headline {
         font-size: 1.125rem;
-        color: #d4d4d4;
+        color: var(--text-hi);
       }
       .subtitle {
         max-width: 24rem;
         font-size: 0.875rem;
-        color: #a3a3a3;
+        color: var(--text-mid);
       }
     </style>
   </head>
   <body>
-    <h1>ArpLens</h1>
+    <div class="bar">
+      <div class="mark"><img src="../assets/logo.svg" alt="ArpLens" /><span class="word">ARPLENS</span></div>
+      <div class="status"><span class="dot"></span> READY · v2.1</div>
+    </div>
+    <div class="brand">
+      <img src="../assets/logo.svg" alt="" class="brand__mark" />
+      <h1>Arp<b>Lens</b></h1>
+    </div>
     <p class="headline">Recreate standard arpeggios from audio.</p>
     <p class="subtitle">
       Get ready-to-use arpeggiator settings for your favorite synth, plugin or DAW.
