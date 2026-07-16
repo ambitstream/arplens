@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -449,6 +449,27 @@ from quantization (`quantized`).
 The UI never modifies this object.
 
 User edits create a separate editable model.
+
+---
+
+# Arpeggio Sandbox
+
+The Sandbox requires no new architecture.
+
+It is an in-page Application State mode: React UI renders
+ResultPanel and Preview directly from a manually-seeded
+editable model, bypassing Audio Decode, Analysis Service,
+Web Worker and Analysis Engine entirely.
+
+No Result DTO ever exists in this mode.
+
+This is the same "separate editable model" already used by
+Manual Editing, seeded with defaults instead of derived from
+an analysis result.
+
+Because it is a mode of Application State rather than a route,
+the Single Page Application principle (no routing, no
+navigation) is unaffected.
 
 ---
 

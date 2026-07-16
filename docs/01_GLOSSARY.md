@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -242,6 +242,18 @@ The duration of one Step in seconds, derived from the Step Grid.
 Step Duration is available whenever a Quantized Sequence exists.
 
 It is part of the Result DTO so that partial results remain playable.
+
+---
+
+# Arpeggio Sandbox
+
+An alternate entry point that lets the user experiment with
+arpeggiator settings without uploading audio.
+
+The Sandbox seeds the editable model with default values instead
+of deriving it from a Result DTO.
+
+It is an in-page mode, not a separate page or route.
 
 ---
 

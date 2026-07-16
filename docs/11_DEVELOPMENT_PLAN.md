@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -56,7 +56,7 @@ Large "everything changed" commits should be avoided.
 M1
 ↓
 
-M2
+M2 ──→ M2.5
 ↓
 
 M3
@@ -72,6 +72,9 @@ M6
 ```
 
 Each milestone depends only on the previous one.
+
+M2.5 is a side branch: it depends only on M2 and nothing later
+depends on it. It does not shift the M3–M6 numbering.
 
 ---
 
@@ -158,6 +161,51 @@ Test:
 - Registry is deterministic
 - Generators pass all Tier 0 tests
 - No audio involved
+
+---
+
+# Milestone 2.5
+
+## Arpeggio Sandbox
+
+### Goal
+
+Let users experiment with arpeggiator settings without
+uploading audio.
+
+### Depends On
+
+Milestone 2 only. Does not require the Analysis Engine or
+audio pipeline (M3/M4).
+
+### Deliverables
+
+- Sandbox Link (UploadCard)
+- In-page Sandbox mode switch (Application State)
+- Seeded editable model (default Input Notes, Style, Rate,
+  Octaves, BPM)
+- ResultPanel reused, with ConfidenceBadge and Play Source
+  omitted
+- PreviewPlayer reused (Play Modulation only)
+- Footer component
+
+### UI
+
+Full Sandbox flow: Sandbox Link → seeded ResultPanel → editing
+→ Play Modulation preview.
+
+### Tests
+
+Component tests for the seeded editable model and for
+ResultPanel/PreviewPlayer rendering without a Result DTO.
+
+### Definition of Done
+
+- Reachable from the Upload section without leaving the page
+- No Result DTO is ever constructed
+- Confidence badge and Play Source are absent
+- Editing and Play Modulation work exactly as in the normal
+  Results flow
 
 ---
 
@@ -364,6 +412,10 @@ feature/m2-registry
 
 ↓
 
+feature/m2.5-sandbox
+
+↓
+
 feature/m3-analysis-core
 
 ↓
@@ -445,6 +497,8 @@ At this point, development transitions from building the MVP to iterative produc
 M1
 ↓
 M2 (requires M1)
+↓
+M2.5 (requires M2 — side branch, nothing later depends on it)
 ↓
 M3 (requires M2)
 ↓

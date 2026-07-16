@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -35,6 +35,9 @@ No routing.
 No navigation.
 
 No modal workflows.
+
+The Arpeggio Sandbox (Section 8) is an in-page mode switch, not
+a second page or route.
 
 ---
 
@@ -197,6 +200,20 @@ display a warning before analysis.
 
 ---
 
+## Sandbox Link
+
+Below the upload card, display a text link:
+
+```
+Go to Arpeggio Sandbox
+```
+
+Selecting it switches the page into Sandbox mode (Section 8).
+
+It does not navigate to a new page.
+
+---
+
 # Section 3 — Waveform
 
 Displays:
@@ -249,13 +266,15 @@ Users cannot create selections outside the allowed range.
 
 ## Playback
 
-Buttons:
+One control:
 
-Play
+```
+Play Source
+```
 
-Pause
-
-Loop
+A single Play ↔ Pause toggle. There is no separate Loop button:
+playback of the selected fragment always loops, so looping is
+not an optional, separately-controlled behavior.
 
 Playback loops only the selected fragment.
 
@@ -522,6 +541,8 @@ Stepper.
 [-] 2 [+]
 ```
 
+Range: 1–4.
+
 ---
 
 ## BPM
@@ -534,12 +555,21 @@ Display:
 [- ÷2]
 
 [×2]
+
+[-] [+]
 ```
 
-Changing BPM updates Rate accordingly.
+`[- ÷2]` and `[×2]` halve/double BPM and update Rate
+accordingly, since doubling/halving preserves a clean
+mathematical relationship to Rate.
 
 If halving or doubling would push Rate outside the supported
 range, the corresponding button is disabled.
+
+`[-]` and `[+]` adjust BPM by 1, independently of Rate.
+
+Arbitrary BPM values have no clean Rate relationship, so the
+±1 stepper never changes Rate.
 
 Manual editing never re-runs transcription.
 
@@ -576,13 +606,14 @@ to the registry-generated sequence.
 
 # Section 7 — Preview
 
-Controls:
+One control:
 
-Play
+```
+Play Modulation
+```
 
-Pause
-
-Loop
+A single Play ↔ Pause toggle, matching the naming and pattern
+of Play Source (Section 3). There is no separate Loop button.
 
 ---
 
@@ -597,9 +628,13 @@ exclusive.
 
 Starting one pauses the other.
 
-Exclusivity is enforced by the app-level Playback Controller.
+Exclusivity is enforced by the app-level Playback Controller,
+which groups Play Source and Play Modulation together.
 
 A/B comparison is performed by toggling between the two.
+
+In Arpeggio Sandbox mode there is no Play Source, since there
+is no source audio.
 
 ---
 
@@ -616,6 +651,64 @@ Partial results
 ↓
 
 Quantized detected sequence.
+
+Arpeggio Sandbox
+
+↓
+
+Registry-generated sequence, from the seeded editable model.
+
+---
+
+# Section 8 — Arpeggio Sandbox
+
+Reachable from the Sandbox Link in Section 2.
+
+An in-page mode. No routing, no new page.
+
+---
+
+## Entry
+
+Switches the visible sections from Upload / Waveform / Analysis
+to a ResultPanel and Preview seeded with default values, using
+the same components as the normal Results flow.
+
+No Result DTO exists in this mode: the editable model is
+seeded directly, exactly as Manual Editing already does.
+
+---
+
+## Header override
+
+While in Sandbox mode, the Header headline and subtitle change
+to:
+
+```
+Arpeggio Sandbox
+```
+
+```
+Experiment with arpeggiator settings — no audio required.
+```
+
+---
+
+## Differences from the normal Results flow
+
+- No Confidence badge (no analysis was performed)
+- No Play Source control (no source audio)
+- Only Play Modulation is available
+
+All fields (Input Notes, Style, Rate, Octaves, BPM) are
+editable, using the same editors as Section 6.
+
+---
+
+## Defaults
+
+Default seed values are a configuration concern, not hardcoded
+in components.
 
 ---
 
@@ -764,6 +857,7 @@ The UI is complete when:
 
  ├── Header
  ├── UploadCard
+ │      └── SandboxLink
  ├── Waveform
  │      ├── FocusRegion
  │      ├── LoopSelection
@@ -778,4 +872,10 @@ The UI is complete when:
  │      ├── SequenceView
  │      └── ConfidenceBadge
  ├── PreviewPlayer
- └── PlaybackController
+ ├── PlaybackController
+ └── Footer
+
+ResultPanel and PreviewPlayer are reused, unmodified, by
+Arpeggio Sandbox mode — driven by a seeded editable model
+instead of a Result DTO. ConfidenceBadge does not render when
+no Result DTO exists.

@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -237,11 +237,14 @@ The Preview Engine never schedules notes using wall-clock timers.
 
 # Playback Controls
 
-Supported controls:
+One control:
 
-- Play
-- Pause
-- Loop
+```
+Play Modulation
+```
+
+A single Play ↔ Pause toggle. There is no separate Loop
+button — see the Looping section below.
 
 Pause resumes from the paused position.
 
@@ -272,6 +275,22 @@ A/B comparison is performed by toggling between the two.
 
 Simultaneous synchronized playback is intentionally out of
 scope for the MVP.
+
+In Arpeggio Sandbox mode there is no original-audio playback,
+so Play Modulation has nothing to be exclusive with.
+
+---
+
+# Arpeggio Sandbox
+
+The Preview Engine's input contract is unchanged: it does not
+know whether a Result DTO ever existed.
+
+Arpeggio Sandbox seeds the same editable model that Manual
+Editing already produces, directly with default values.
+
+The Preview Engine plays the registry-generated sequence
+exactly as it would for any complete, editable result.
 
 ---
 

@@ -222,6 +222,115 @@ Date:
 
 ---
 
+# v2.2 (Frozen)
+
+Date:
+
+2026-07-16
+
+Status:
+
+Frozen (2026-07-16)
+
+---
+
+### Summary
+
+Adoption of the completed Claude Design mockups as source of
+truth, plus resolution of the three design decisions that
+needed explicit approval before they could be adopted.
+
+---
+
+### Changes
+
+1. **Arpeggio Sandbox** added as an MVP feature: an in-page
+   mode, reachable via a "Go to Arpeggio Sandbox" link below
+   the Upload card, that seeds the editable model with default
+   values and reuses ResultPanel/PreviewPlayer without ever
+   producing a Result DTO. Implemented as an Application State
+   mode, not a new page or route — D-400 (Single Page
+   Application) remains intact. (D-405)
+
+2. **BPM ±1 fine adjustment** added alongside ×2 / ÷2. Only
+   ×2 / ÷2 continue to update Rate; the ±1 stepper adjusts BPM
+   independently, since arbitrary BPM values have no clean
+   relationship to Rate. (D-406)
+
+3. **Playback controls unified.** The "Play / Pause / Loop"
+   three-button list (Waveform, Preview) becomes one Play ↔
+   Pause toggle per source: "Play Source" (original audio) and
+   "Play Modulation" (reconstructed sequence). No literal Loop
+   button exists anywhere — playback of the relevant fragment
+   was already always-looping, so a separate toggle had nothing
+   to control. (D-502)
+
+4. **Footer component** added to the component tree.
+
+5. **Supported Octaves formalized** as an explicit MVP range
+   (1–4) in the PRD; previously only implied by Tier 0 fixture
+   coverage.
+
+6. **Milestone 2.5: Arpeggio Sandbox** inserted as a side
+   branch after M2 — it depends only on the Style Registry, not
+   on the Analysis Engine or audio pipeline, and nothing later
+   depends on it. M3–M6 numbering is unaffected.
+
+---
+
+### Changed Documents
+
+- 00_READ_ME.md
+- 01_GLOSSARY.md
+- 02_PRD.md
+- 03_ARCHITECTURE.md
+- 06_UI_SPEC.md
+- 07_PREVIEW_ENGINE.md
+- 09_DECISIONS.md
+- 11_DEVELOPMENT_PLAN.md
+
+---
+
+### Motivation
+
+The Claude Design mockups (project "ArpLens") were reviewed
+against the frozen v2.1 specification end to end. Most
+differences were additive UI chrome or simplifications with no
+architectural cost and were adopted directly. Three differences
+had real product/architecture implications (in-page vs. real
+routing for Sandbox, scope of BPM editing, and Rate-sync
+behavior for the new BPM control) and were resolved with the
+user individually before this entry was written.
+
+---
+
+### Breaking Changes
+
+None.
+
+No implementation of Sandbox, BPM fine adjustment, or the
+unified playback controls existed before v2.2.
+
+---
+
+### Migration Notes
+
+None.
+
+---
+
+### Approval
+
+Approved by:
+
+User
+
+Date:
+
+2026-07-16
+
+---
+
 # Future Entries
 
 ## Template

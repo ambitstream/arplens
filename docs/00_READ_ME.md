@@ -1,6 +1,6 @@
 # ArpLens Documentation
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -275,7 +275,7 @@ The architecture should allow new arpeggiator styles without changing existing c
 
 # Documentation Status
 
-This documentation represents the frozen specification for ArpLens v2.1.
+This documentation represents the frozen specification for ArpLens v2.2.
 
 Implementation should follow this specification.
 
