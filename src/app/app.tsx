@@ -1,3 +1,4 @@
+import { AnalysisDebug } from '../components/analysis-debug';
 import { RegistryDebug } from '../components/registry-debug';
 
 export function App() {
@@ -12,6 +13,7 @@ export function App() {
       </header>
 
       <RegistryDebug />
+      <AnalysisDebug />
     </main>
   );
 }
