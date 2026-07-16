@@ -1,0 +1,293 @@
+<!-- @dsCard group="Components" viewport="720x520" name="Waveform" subtitle="Focus Region → Crop → Loop Selection" -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waveform — Amber Rack</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-0);
+        color: var(--text-hi);
+        font-family: var(--font-sans);
+        padding: 40px 24px;
+      }
+      .card {
+        width: 620px;
+        border-radius: var(--r-lg);
+        background: var(--bg-1);
+        border: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .card__strip {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 11px 16px; border-bottom: 1px solid var(--line);
+      }
+      .card__id { display: flex; align-items: center; gap: 9px; }
+      .card__num { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bg-0); background: var(--accent); padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+      .card__title { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-hi); }
+      .card__hint { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--text-lo); }
+      .card__body { padding: 16px; }
+
+      /* file row */
+      .row { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }
+      .play {
+        flex: 0 0 auto;
+        width: 46px; height: 46px;
+        border-radius: var(--r-sm);
+        background: color-mix(in oklab, var(--accent) 14%, var(--bg-2));
+        border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--line));
+        display: flex; align-items: center; justify-content: center;
+        color: var(--accent); cursor: pointer;
+        transition: filter 140ms ease, background 140ms ease;
+      }
+      .play:hover { filter: brightness(1.12); }
+      .play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .play svg { display: block; }
+      .row__meta { flex: 1; min-width: 0; }
+      .row__name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .row__sub { margin-top: 3px; font-family: var(--font-mono); font-size: 11px; color: var(--text-lo); display: flex; align-items: center; gap: 8px; }
+      .row__ok { color: var(--sem-green); display: inline-flex; align-items: center; gap: 5px; }
+      .row__ok::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--sem-green); box-shadow: 0 0 6px -1px var(--sem-green); }
+      .nav {
+        flex: 0 0 auto; width: 30px; height: 30px; border-radius: var(--r-sm);
+        background: transparent; border: 1px solid var(--line); color: var(--text-mid);
+        display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;
+      }
+      .nav:hover { color: var(--text-hi); border-color: var(--text-lo); }
+      .nav:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+      /* waveform track */
+      .track {
+        position: relative;
+        height: 120px;
+        border-radius: var(--r-sm);
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        overflow: hidden;
+        user-select: none;
+      }
+      .bars { position: absolute; inset: 0; display: flex; align-items: center; gap: 3px; padding: 0 12px; }
+      .bars i { flex: 1; border-radius: 1px; background: var(--text-lo); opacity: 0.4; transition: opacity 120ms ease; }
+
+      /* region overlay */
+      .region {
+        position: absolute; top: 0; bottom: 0;
+        background: color-mix(in oklab, var(--accent) 8%, transparent);
+        border-left: 1.5px solid var(--accent);
+        border-right: 1.5px solid var(--accent);
+        cursor: grab;
+      }
+      .region.is-dragging { cursor: grabbing; }
+      /* bright bars clipped to region live in their own layer */
+      .brightwrap { position: absolute; top: 0; bottom: 0; overflow: hidden; pointer-events: none; }
+      .brightwrap .bars i { opacity: 1; background: var(--accent); }
+
+      /* loop handles (step 2) */
+      .handle {
+        position: absolute; top: 0; bottom: 0; width: 12px;
+        background: var(--accent); cursor: ew-resize;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .handle::after { content: ""; width: 2px; height: 22px; background: var(--bg-0); border-radius: 1px; }
+      .handle--l { left: -6px; border-radius: 4px 0 0 4px; }
+      .handle--r { right: -6px; border-radius: 0 4px 4px 0; }
+      .region--loop { cursor: grab; }
+
+      .readout { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+      .readout__t { font-family: var(--font-mono); font-size: 11px; color: var(--text-lo); }
+      .readout__t b { color: var(--accent); font-weight: 600; }
+
+      .instruction { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-mid); }
+      .cta {
+        margin-top: 12px; width: 100%;
+        padding: 13px; border-radius: var(--r-md);
+        background: var(--accent); color: var(--bg-0); border: none;
+        font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+        cursor: pointer; transition: filter 140ms ease;
+      }
+      .cta:hover { filter: brightness(1.08); }
+      .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__strip">
+        <div class="card__id"><span class="card__num">02</span><span class="card__title" id="stepTitle">FOCUS REGION</span></div>
+        <span class="card__hint" id="stepHint">3:42 TOTAL</span>
+      </div>
+      <div class="card__body">
+        <div class="row">
+          <button class="play" id="playBtn" type="button" aria-label="Play loop">
+            <svg id="playIcon" width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M4 3l11 6-11 6z"/></svg>
+          </button>
+          <div class="row__meta">
+            <div class="row__name">bassline_loop_am_120.wav</div>
+            <div class="row__sub"><span class="row__ok">Ready</span> · 3:42 · 44.1 kHz · 18.4 MB</div>
+          </div>
+          <button class="nav" id="navBtn" type="button" aria-label="Close">✕</button>
+        </div>
+
+        <div class="track" id="track">
+          <div class="bars" id="baseBars"></div>
+          <div class="brightwrap" id="brightWrap"><div class="bars" id="brightBars"></div></div>
+          <div class="region" id="region">
+            <div class="handle handle--l" id="handleL" style="display:none"></div>
+            <div class="handle handle--r" id="handleR" style="display:none"></div>
+          </div>
+        </div>
+        <div class="readout">
+          <span class="readout__t" id="readoutSel">Focus Region · <b>1:00</b> selected</span>
+          <span class="readout__t" id="readoutHint">drag the region to reposition</span>
+        </div>
+
+        <p class="instruction" id="instruction">Select a one-minute section containing the arpeggio.</p>
+        <button class="cta" id="cta" type="button">Crop</button>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const track = document.getElementById('track');
+        const region = document.getElementById('region');
+        const baseBars = document.getElementById('baseBars');
+        const brightBars = document.getElementById('brightBars');
+        const brightWrap = document.getElementById('brightWrap');
+        const handleL = document.getElementById('handleL');
+        const handleR = document.getElementById('handleR');
+        const cta = document.getElementById('cta');
+        const navBtn = document.getElementById('navBtn');
+        const instruction = document.getElementById('instruction');
+        const stepTitle = document.getElementById('stepTitle');
+        const stepHint = document.getElementById('stepHint');
+        const readoutSel = document.getElementById('readoutSel');
+        const readoutHint = document.getElementById('readoutHint');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+
+        // --- build bars (deterministic pseudo-random heights) ---
+        const N = 90;
+        let seed = 7;
+        const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+        const heights = Array.from({ length: N }, () => 24 + rnd() * 74);
+        const makeBars = (el) => { el.innerHTML = heights.map(h => `<i style="height:${h}%"></i>`).join(''); };
+        makeBars(baseBars);
+        makeBars(brightBars);
+
+        const TOTAL_SEC = 222; // 3:42
+        let step = 1;              // 1 = focus region, 2 = loop selection
+        // region as fraction of track [start,width]
+        let regStart = 0, regWidth = 60 / TOTAL_SEC; // first minute
+        let loopStart = 0.15, loopWidth = 0.10;       // fraction of focus region
+
+        function pct(x) { return (x * 100) + '%'; }
+        function fmt(sec) { const m = Math.floor(sec / 60), s = Math.round(sec % 60); return m + ':' + String(s).padStart(2, '0'); }
+
+        function render() {
+          if (step === 1) {
+            region.style.left = pct(regStart);
+            region.style.width = pct(regWidth);
+            // bright layer aligns to region: shift inner bars left by region start
+            brightWrap.style.left = pct(regStart);
+            brightWrap.style.width = pct(regWidth);
+            brightBars.style.width = pct(1 / regWidth);
+            brightBars.style.transform = `translateX(${-regStart * 100}%)`;
+            readoutSel.innerHTML = 'Focus Region · <b>1:00</b> selected';
+            readoutHint.textContent = 'drag the region to reposition';
+          } else {
+            // step 2: region represents the loop inside the cropped minute
+            region.style.left = pct(loopStart);
+            region.style.width = pct(loopWidth);
+            brightWrap.style.left = pct(loopStart);
+            brightWrap.style.width = pct(loopWidth);
+            brightBars.style.width = pct(1 / loopWidth);
+            brightBars.style.transform = `translateX(${-loopStart * 100}%)`;
+            const secs = loopWidth * 60;
+            readoutSel.innerHTML = 'Loop · <b>' + fmt(secs) + '</b> · 3–20s';
+            readoutHint.textContent = 'drag edges to resize · drag body to move';
+          }
+        }
+
+        function toStep(n) {
+          step = n;
+          if (n === 2) {
+            stepTitle.textContent = 'LOOP SELECTION';
+            stepHint.textContent = '1:00 CROPPED';
+            instruction.innerHTML = 'Select one complete arpeggio phrase that loops seamlessly.<br /><b style="color:var(--text-hi);font-weight:500">The better the loop, the more accurate the analysis.</b>';
+            cta.textContent = 'Analyze';
+            navBtn.textContent = '←';
+            navBtn.setAttribute('aria-label', 'Back');
+            handleL.style.display = 'flex';
+            handleR.style.display = 'flex';
+            region.classList.add('region--loop');
+          } else {
+            stepTitle.textContent = 'FOCUS REGION';
+            stepHint.textContent = '3:42 TOTAL';
+            instruction.textContent = 'Select a one-minute section containing the arpeggio.';
+            cta.textContent = 'Crop';
+            navBtn.textContent = '✕';
+            navBtn.setAttribute('aria-label', 'Close');
+            handleL.style.display = 'none';
+            handleR.style.display = 'none';
+            region.classList.remove('region--loop');
+          }
+          render();
+        }
+
+        cta.addEventListener('click', () => { if (step === 1) toStep(2); });
+        navBtn.addEventListener('click', () => { if (step === 2) toStep(1); });
+
+        // play/pause toggle
+        let playing = false;
+        playBtn.addEventListener('click', () => {
+          playing = !playing;
+          if (playing) {
+            playIcon.innerHTML = '<rect x="4" y="3" width="3.5" height="12" rx="1"/><rect x="10.5" y="3" width="3.5" height="12" rx="1"/>';
+            playBtn.setAttribute('aria-label', 'Pause loop');
+          } else {
+            playIcon.innerHTML = '<path d="M4 3l11 6-11 6z"/>';
+            playBtn.setAttribute('aria-label', 'Play loop');
+          }
+        });
+
+        // --- dragging ---
+        let drag = null;
+        function trackRect() { return track.getBoundingClientRect(); }
+        function xToFrac(clientX) { const r = trackRect(); return (clientX - r.left) / r.width; }
+
+        region.addEventListener('pointerdown', (e) => {
+          if (e.target === handleL || e.target === handleR) return;
+          const f = xToFrac(e.clientX);
+          drag = { type: 'move', grab: f - (step === 1 ? regStart : loopStart) };
+          region.classList.add('is-dragging');
+          region.setPointerCapture(e.pointerId);
+        });
+        handleL.addEventListener('pointerdown', (e) => { e.stopPropagation(); drag = { type: 'l' }; region.setPointerCapture(e.pointerId); });
+        handleR.addEventListener('pointerdown', (e) => { e.stopPropagation(); drag = { type: 'r' }; region.setPointerCapture(e.pointerId); });
+
+        region.addEventListener('pointermove', (e) => {
+          if (!drag) return;
+          const f = xToFrac(e.clientX);
+          if (step === 1) {
+            if (drag.type === 'move') regStart = Math.max(0, Math.min(1 - regWidth, f - drag.grab));
+          } else {
+            const MIN = 3 / 60, MAX = 20 / 60;
+            if (drag.type === 'move') loopStart = Math.max(0, Math.min(1 - loopWidth, f - drag.grab));
+            else if (drag.type === 'l') { const end = loopStart + loopWidth; loopStart = Math.max(0, Math.min(end - MIN, Math.max(end - MAX, f))); loopWidth = end - loopStart; }
+            else if (drag.type === 'r') { const w = Math.max(MIN, Math.min(MAX, f - loopStart)); loopWidth = Math.min(1 - loopStart, w); }
+          }
+          render();
+        });
+        region.addEventListener('pointerup', () => { drag = null; region.classList.remove('is-dragging'); });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>
