@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.2 (Frozen)
+**Version:** 2.3 (Frozen)
 
 ---
 
@@ -36,7 +36,7 @@ No navigation.
 
 No modal workflows.
 
-The Arpeggio Sandbox (Section 8) is an in-page mode switch, not
+The Arpeggio Sandbox (Section 7) is an in-page mode switch, not
 a second page or route.
 
 ---
@@ -79,6 +79,9 @@ Unknown values remain unknown.
 
 # Layout
 
+The page has a fixed shell — Header above, Footer below — and
+one active panel between them:
+
 ```
 +-----------------------------------------------------------+
 
@@ -88,28 +91,52 @@ Recreate standard arpeggios from audio.
 
 ------------------------------------------------------------
 
-Upload Audio
+                    [ active panel ]
 
 ------------------------------------------------------------
 
-Waveform
-
-------------------------------------------------------------
-
-Analysis
-
-------------------------------------------------------------
-
-Results
-
-------------------------------------------------------------
-
-Preview
+                       Footer
 
 +-----------------------------------------------------------+
 ```
 
-Everything fits on one page.
+Only one panel is visible at a time. Completing a step
+replaces the active panel with the next one; it does not
+append a new section below the previous one.
+
+Panel sequence:
+
+```
+01 · Input       (Upload)
+
+↓
+
+02 · Waveform    (Focus Region, then Loop Selection —
+                  same panel, two sub-steps)
+
+↓
+
+03 · Analysis    (Idle / Loading / Completed / Failed)
+
+↓
+
+04 · Results     (settings + Playback, editable)
+```
+
+Preview is not its own panel. Playback (Play Source, Play
+Modulation) lives inside the Results panel — see Section 5.
+
+Arpeggio Sandbox reuses the same "04" panel slot as Results,
+reached directly from Input without passing through Waveform
+or Analysis (Section 7).
+
+A compact summary of the completed step (e.g. the uploaded
+file's name and status) carries forward into the next panel's
+header row; it is not kept as a separate visible section.
+
+Everything fits on one page: this is a panel switch driven by
+Application State, not routing or navigation (see Single Page
+Application, above).
 
 ---
 
@@ -208,7 +235,7 @@ Below the upload card, display a text link:
 Go to Arpeggio Sandbox
 ```
 
-Selecting it switches the page into Sandbox mode (Section 8).
+Selecting it switches the page into Sandbox mode (Section 7).
 
 It does not navigate to a new page.
 
@@ -223,6 +250,17 @@ audio waveform
 Playback cursor
 
 Selection overlays
+
+---
+
+## File Summary
+
+A compact row above the waveform shows the loaded file: name,
+a Ready status indicator, duration, sample rate, and file
+size.
+
+A control on this row lets the user remove the file and return
+to Section 2 (Upload).
 
 ---
 
@@ -261,6 +299,9 @@ The left and right handles are draggable.
 The control itself prevents invalid lengths.
 
 Users cannot create selections outside the allowed range.
+
+A control lets the user step back from Loop Selection to
+Focus Region.
 
 ---
 
@@ -336,6 +377,58 @@ Analyzing...
 # Section 5 — Results
 
 Results appear only after analysis.
+
+Preview is not a separate panel: playback controls live inside
+this panel, alongside the editable settings.
+
+---
+
+## Playback
+
+Two controls at the top of the panel:
+
+```
+Play Source
+
+Play Modulation
+```
+
+Each is a single Play ↔ Pause toggle. There is no separate
+Loop button: playback always loops, so looping is not an
+optional, separately-controlled behavior.
+
+Play Source plays the original audio (the selected loop from
+Section 3). Play Modulation plays the reconstructed arpeggio.
+
+Play Source and Play Modulation are mutually exclusive.
+Starting one pauses the other. Exclusivity is enforced by the
+app-level Playback Controller, which groups the two together.
+A/B comparison is performed by toggling between them.
+
+Play Modulation plays:
+
+```
+Level 4
+
+↓
+
+Registry-generated sequence.
+
+Partial results
+
+↓
+
+Quantized detected sequence.
+
+Arpeggio Sandbox
+
+↓
+
+Registry-generated sequence, from the seeded editable model.
+```
+
+In Arpeggio Sandbox mode (Section 7) there is no Play Source,
+since there is no source audio.
 
 ---
 
@@ -602,65 +695,17 @@ sequence.
 As soon as the last missing field is set, the preview switches
 to the registry-generated sequence.
 
----
+Playback always loops; there is no one-shot playback mode
+(see Playback, above).
 
-# Section 7 — Preview
-
-One control:
-
-```
-Play Modulation
-```
-
-A single Play ↔ Pause toggle, matching the naming and pattern
-of Play Source (Section 3). There is no separate Loop button.
+`[- ÷2]` and `[×2]` are shown whenever BPM and Rate are both
+defined (detected or user-set), regardless of whether Style is
+detected. They depend only on BPM and Rate, not on Style or
+Confidence.
 
 ---
 
-Playback always loops.
-
-There is no one-shot playback mode.
-
----
-
-Preview playback and original-audio playback are mutually
-exclusive.
-
-Starting one pauses the other.
-
-Exclusivity is enforced by the app-level Playback Controller,
-which groups Play Source and Play Modulation together.
-
-A/B comparison is performed by toggling between the two.
-
-In Arpeggio Sandbox mode there is no Play Source, since there
-is no source audio.
-
----
-
-Preview plays:
-
-Level 4
-
-↓
-
-Registry-generated sequence.
-
-Partial results
-
-↓
-
-Quantized detected sequence.
-
-Arpeggio Sandbox
-
-↓
-
-Registry-generated sequence, from the seeded editable model.
-
----
-
-# Section 8 — Arpeggio Sandbox
+# Section 7 — Arpeggio Sandbox
 
 Reachable from the Sandbox Link in Section 2.
 
@@ -670,9 +715,11 @@ An in-page mode. No routing, no new page.
 
 ## Entry
 
-Switches the visible sections from Upload / Waveform / Analysis
-to a ResultPanel and Preview seeded with default values, using
-the same components as the normal Results flow.
+Replaces the active panel (Upload) directly with the Results
+panel (Section 5), seeded with default values, skipping
+Waveform and Analysis entirely. Uses the same ResultPanel
+component — including its embedded Playback controls — as the
+normal Results flow.
 
 No Result DTO exists in this mode: the editable model is
 seeded directly, exactly as Manual Editing already does.
@@ -728,13 +775,10 @@ Analyzing
 
 Displaying Results
 
-↓
-
-Editing
-
-↓
-
-Preview
+Editing and Playback are both available once results are
+displayed. They are concurrent capabilities of the same panel,
+not sequential states — the user may edit, listen, edit again,
+and listen again in any order.
 
 ---
 
@@ -864,6 +908,7 @@ The UI is complete when:
  │      └── PlaybackControls
  ├── AnalyzeButton
  ├── ResultPanel
+ │      ├── PreviewPlayer
  │      ├── BPMCard
  │      ├── NotesEditor
  │      ├── StyleEditor
@@ -871,11 +916,18 @@ The UI is complete when:
  │      ├── OctavesEditor
  │      ├── SequenceView
  │      └── ConfidenceBadge
- ├── PreviewPlayer
  ├── PlaybackController
  └── Footer
 
-ResultPanel and PreviewPlayer are reused, unmodified, by
+Only one of {UploadCard, Waveform, AnalyzeButton, ResultPanel}
+is rendered at a time — see Layout.
+
+PreviewPlayer moved inside ResultPanel: Playback (Play Source,
+Play Modulation) is part of the Results panel, not a standalone
+section. PlaybackController remains a cross-cutting concern
+(App-level) since it also mediates Waveform's Play Source.
+
+ResultPanel (including PreviewPlayer) is reused, unmodified, by
 Arpeggio Sandbox mode — driven by a seeded editable model
 instead of a Result DTO. ConfidenceBadge does not render when
 no Result DTO exists.

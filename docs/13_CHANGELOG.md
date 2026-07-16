@@ -331,6 +331,114 @@ Date:
 
 ---
 
+# v2.3 (Frozen)
+
+Date:
+
+2026-07-16
+
+Status:
+
+Frozen (2026-07-16)
+
+---
+
+### Summary
+
+A full re-review of the complete Claude Design "ArpLens"
+project (all four page screens, all seven components, the
+brand exploration doc) against v2.2, with design explicitly
+made the source of truth for UI decisions. The design project
+was also mirrored into the repository under `design/` so it is
+versioned alongside the code.
+
+---
+
+### Changes
+
+1. **Page layout corrected to a single active panel.** All
+   four rendered design screens consistently show exactly one
+   panel at a time (Input → Waveform → Analysis → Results/
+   Sandbox), each replacing the previous rather than stacking
+   below it — contradicting the v2.0–v2.2 Layout diagram, which
+   showed five sections stacked and simultaneously visible.
+   (D-407)
+
+2. **Preview merged into the Results panel.** Play Source and
+   Play Modulation are rendered inside the Results (and
+   Sandbox) panel, not as a standalone page section. The former
+   "Section 7 — Preview" was folded into Section 5 (Results);
+   Arpeggio Sandbox is renumbered to Section 7. The component
+   tree moves PreviewPlayer inside ResultPanel. (D-407)
+
+3. **BPM ×2/÷2 visibility clarified**: shown whenever BPM and
+   Rate are both defined, independent of Style or Confidence.
+   The v2.2 partial-result mockup that omitted them was
+   confirmed to be a mockup simplification, not a rule.
+   (D-406, amended)
+
+4. **Waveform panel elaborated**: a file summary readout
+   (name, Ready status, duration, sample rate, size) and
+   controls to remove the file or step back from Loop Selection
+   to Focus Region — both additive, non-conflicting detail
+   supplied by the design where the spec was previously silent.
+
+5. **Loading States** updated: Editing and Playback are
+   concurrent capabilities of the Results panel, not sequential
+   named states, consistent with change #2.
+
+6. **Design mirrored into the repository** under `design/` —
+   all page screens, components, the brand/foundation
+   exploration doc, tokens (`styles.css`) and logo assets — so
+   design decisions are versioned with the code, not only
+   reachable via claude.ai/design.
+
+---
+
+### Changed Documents
+
+- 06_UI_SPEC.md
+- 09_DECISIONS.md
+
+---
+
+### Motivation
+
+The user requested a full re-review with design explicitly
+prioritized over documentation for UI decisions, and asked that
+any genuine contradiction (not mere missing detail) be
+individually confirmed rather than assumed. Two contradictions
+were found and confirmed; several additive details with no
+competing interpretation were adopted directly, consistent with
+design taking priority.
+
+---
+
+### Breaking Changes
+
+None. No implementation of the page layout, Results panel, or
+Arpeggio Sandbox existed before v2.3.
+
+---
+
+### Migration Notes
+
+None.
+
+---
+
+### Approval
+
+Approved by:
+
+User
+
+Date:
+
+2026-07-16
+
+---
+
 # Future Entries
 
 ## Template
