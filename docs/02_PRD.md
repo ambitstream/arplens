@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -139,6 +139,7 @@ The MVP supports:
 - Tone.js preview
 - Manual editing
 - Partial results
+- Arpeggio Sandbox (experiment with settings without uploading audio)
 
 ---
 
@@ -251,6 +252,29 @@ Preview reconstructed arpeggio.
 
 ---
 
+# Arpeggio Sandbox
+
+An alternate entry point, reachable from the Upload section,
+that lets the user experiment with arpeggiator settings without
+uploading audio.
+
+The Sandbox skips Steps 1–4 entirely and opens directly on
+editable settings, seeded with default values.
+
+It is an in-page mode of the same single page, not a separate
+page or route.
+
+The Sandbox never has:
+
+- Confidence (no analysis was performed)
+- source audio, and therefore no Play Source control
+
+The user may only edit settings and use Play Modulation.
+
+The full behavior is defined in the UI Specification.
+
+---
+
 # Output
 
 The application may return:
@@ -320,7 +344,12 @@ Users may edit:
 - Style
 - Rate
 - Octaves
-- BPM (×2 / ÷2)
+- BPM (×2 / ÷2, or a ±1 fine adjustment)
+
+Only ×2 / ÷2 update Rate accordingly, since they preserve a
+clean mathematical relationship to the original tempo.
+
+The ±1 fine adjustment changes BPM independently of Rate.
 
 Manual editing never re-runs transcription.
 
@@ -336,6 +365,14 @@ It only regenerates the reconstructed sequence and preview.
 - DownUp
 
 The architecture must support adding new styles without redesign.
+
+---
+
+# Supported Octaves (MVP)
+
+Range:
+
+1–4
 
 ---
 

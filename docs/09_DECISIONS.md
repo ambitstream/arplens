@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.1 (Frozen)
+**Version:** 2.2 (Frozen)
 
 ---
 
@@ -749,6 +749,10 @@ Fast workflow.
 
 Minimal navigation.
 
+Amended in v2.2: Arpeggio Sandbox (D-405) is implemented as an
+in-page Application State mode, not a new page or route. This
+decision remains intact.
+
 ---
 
 ## D-401
@@ -844,6 +848,60 @@ editing in style-less states undefined.
 
 ---
 
+## D-405
+
+### Arpeggio Sandbox
+
+Status
+
+Approved (v2.2)
+
+Decision
+
+An in-page mode, reachable via a text link below the Upload
+card, that seeds the editable model with default values and
+renders ResultPanel + Preview without ever producing a Result
+DTO. No routing or new page is introduced. Confidence and Play
+Source are omitted, since neither analysis nor source audio
+exist in this mode.
+
+Rationale
+
+Sourced from design. Reuses the editable-model pattern already
+established by Manual Editing (D-403) instead of inventing a
+new data path; the design's own layout independently reused
+the same ResultPanel slot for both Results and Sandbox,
+confirming this is a mode of one component, not a new screen.
+
+Consequence
+
+ResultPanel and PreviewPlayer require no new component
+variants — only an alternate seeding path.
+
+---
+
+## D-406
+
+### BPM ±1 Fine Adjustment
+
+Status
+
+Approved (v2.2)
+
+Decision
+
+BPM editing gains a ±1 stepper alongside ×2 / ÷2. Only ×2 / ÷2
+update Rate; the ±1 stepper changes BPM independently of Rate.
+
+Rationale
+
+Sourced from design. Arbitrary BPM values have no clean
+mathematical relationship to Rate, unlike doubling/halving, so
+extending the "changing BPM updates Rate accordingly" rule to
+±1 adjustments would be arbitrary rather than principled.
+
+---
+
 # Preview Decisions
 
 ## D-500
@@ -895,6 +953,39 @@ Toggling is sufficient for A/B comparison.
 Consequence
 
 Simultaneous synchronized playback is out of scope for the MVP.
+
+---
+
+## D-502
+
+### Unified Play/Pause Controls
+
+Status
+
+Approved (v2.2)
+
+Decision
+
+The three-button "Play / Pause / Loop" control list (Waveform
+Section 3, Preview Section 7) becomes one Play ↔ Pause toggle
+per source, named "Play Source" (original audio) and "Play
+Modulation" (reconstructed sequence). No separate Loop button
+exists anywhere in the product.
+
+Rationale
+
+Sourced from design. A literal Loop button never had anything
+to toggle: playback of the selected fragment, and preview
+playback, already always loop with "no one-shot mode" — a
+constraint the v2.0/v2.1 spec stated but never reconciled with
+listing Loop as a button. Naming the two toggles by source also
+removes the previous ambiguity of two differently-scoped
+buttons both called "Play".
+
+Consequence
+
+The Playback Controller (D-501) groups exactly these two named
+controls.
 
 ---
 
