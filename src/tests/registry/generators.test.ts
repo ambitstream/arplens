@@ -50,25 +50,11 @@ describe('exact fixtures', () => {
   });
 
   it('UpDown, 2 notes, 2 octaves', () => {
-    expect(generateUpDown({ noteCount: 2, octaves: 2 })).toEqual([
-      [0],
-      [1],
-      [2],
-      [3],
-      [2],
-      [1],
-    ]);
+    expect(generateUpDown({ noteCount: 2, octaves: 2 })).toEqual([[0], [1], [2], [3], [2], [1]]);
   });
 
   it('DownUp, 2 notes, 2 octaves', () => {
-    expect(generateDownUp({ noteCount: 2, octaves: 2 })).toEqual([
-      [3],
-      [2],
-      [1],
-      [0],
-      [1],
-      [2],
-    ]);
+    expect(generateDownUp({ noteCount: 2, octaves: 2 })).toEqual([[3], [2], [1], [0], [1], [2]]);
   });
 
   it('single index degenerates to a one-step cycle for every style', () => {
