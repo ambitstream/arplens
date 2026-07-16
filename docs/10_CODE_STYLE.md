@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.2 (Frozen)
+**Version:** 2.3 (Frozen)
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.2 (Frozen)
+**Version:** 2.3 (Frozen)
 
 ---
 
@@ -899,6 +899,53 @@ Sourced from design. Arbitrary BPM values have no clean
 mathematical relationship to Rate, unlike doubling/halving, so
 extending the "changing BPM updates Rate accordingly" rule to
 ±1 adjustments would be arbitrary rather than principled.
+
+Amended in v2.3: ×2 / ÷2 are shown whenever BPM and Rate are
+both defined, independent of Style or Confidence. The v2.2
+partial-result mockup that omitted them was a mockup
+simplification, not a rule — nothing about Style being
+undetected changes whether doubling/halving a known BPM+Rate
+pair is meaningful.
+
+---
+
+## D-407
+
+### Single Active Panel Layout
+
+Status
+
+Approved (v2.3)
+
+Decision
+
+The page renders exactly one active panel at a time (Input →
+Waveform → Analysis → Results), each replacing the previous
+rather than appending below it. Preview is not a standalone
+panel: Play Source and Play Modulation live inside the Results
+panel (and, in Arpeggio Sandbox, the Sandbox panel), alongside
+the editable settings.
+
+Rationale
+
+Sourced from design: all four rendered screens (Input,
+Waveform, Results, Sandbox) consistently show exactly one
+panel, and Results embeds the playback controls directly in
+its own card rather than treating Preview as a separate
+section. This corrects the v2.0–v2.2 UI Specification, whose
+Layout diagram depicted five sections stacked and simultaneously
+visible — a model no design screen ever showed.
+
+Consequence
+
+The UI Specification's Layout section, Section 5 (Results) and
+former Section 7 (Preview) were restructured: Preview's rules
+(playback, looping, A/B exclusivity, sequence source by level)
+now live inside Section 5. Arpeggio Sandbox is renumbered to
+Section 7. The component tree moves PreviewPlayer inside
+ResultPanel. D-400 (Single Page Application) is unaffected —
+this remains a single DOM, no routing, no navigation; only the
+in-page panel-switching model was clarified.
 
 ---
 
