@@ -36,22 +36,33 @@ describe('cleanup (stage 3)', () => {
     expect(result.events[0].durationSeconds).toBeCloseTo(0.22, 9);
   });
 
-  it('collapses heavily overlapping events to the stronger one', () => {
+  it('collapses near-simultaneous detections to the strongest (harmonic bleed)', () => {
+    // A struck note plus a harmonic partial the model fires at the
+    // same instant; the louder fundamental survives.
     const result = cleanup(
-      [raw(60, 0, 0.2, 0.4), raw(64, 0.02, 0.2, 0.9), raw(67, 0.4, 0.1)],
+      [raw(58, 0, 0.3, 0.85), raw(62, 0.012, 0.3, 0.54), raw(65, 0.4, 0.1)],
       DEFAULT_ANALYSIS_CONFIG,
     );
 
-    expect(result.events.map((e) => e.midiFloat)).toEqual([64, 67]);
+    expect(result.events.map((e) => e.midiFloat)).toEqual([58, 65]);
   });
 
-  it('keeps lightly overlapping events (release tails)', () => {
+  it('keeps a quiet turnaround note on its own step even when durations overlap', () => {
+    // Regression for the real-audio bug: A# D F D at ~0.33s steps
+    // with near-full-step durations that lap into each other. The
+    // quiet D on its own step must NOT be swallowed by a louder
+    // neighbour — every step survives.
     const result = cleanup(
-      [raw(60, 0, 0.13), raw(64, 0.125, 0.13), raw(67, 0.25, 0.13)],
+      [
+        raw(58, 0.0, 0.32, 0.85), // A#
+        raw(62, 0.33, 0.32, 0.55), // D (quiet turnaround)
+        raw(65, 0.66, 0.32, 0.82), // F
+        raw(62, 0.99, 0.32, 0.5), // D (quiet turnaround)
+      ],
       DEFAULT_ANALYSIS_CONFIG,
     );
 
-    expect(result.events).toHaveLength(3);
+    expect(result.events.map((e) => e.midiFloat)).toEqual([58, 62, 65, 62]);
   });
 
   it('removes sustained background notes (pad filter)', () => {

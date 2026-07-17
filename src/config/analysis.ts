@@ -36,10 +36,14 @@ export interface AnalysisConfig {
   readonly sustainedDurationFactor: number;
 
   /**
-   * Cleanup: overlapping events sharing more than this fraction of
-   * the shorter event's duration collapse to the stronger one.
+   * Cleanup: events whose onsets fall within this window are treated
+   * as one instant (a fundamental plus its bleed / near-simultaneous
+   * harmonics) and collapse to the single most-confident event.
+   * Distinct sequential steps have onsets a full step apart, so they
+   * are never merged — unlike duration-overlap collapse, which drops
+   * a quiet turnaround note whose tail laps into a louder neighbour.
    */
-  readonly overlapTolerance: number;
+  readonly simultaneityWindowSeconds: number;
 
   /**
    * Step-grid selection: weight of the empty-step ratio added to the
@@ -100,7 +104,7 @@ export const DEFAULT_ANALYSIS_CONFIG: AnalysisConfig = {
   minEventDurationSeconds: 0.03,
   mergeGapSeconds: 0.04,
   sustainedDurationFactor: 4,
-  overlapTolerance: 0.5,
+  simultaneityWindowSeconds: 0.03,
   gridHolePenalty: 0.5,
   minEvents: 3,
   ioiClusterTolerance: 0.1,

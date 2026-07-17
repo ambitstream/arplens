@@ -24,9 +24,10 @@ export interface CleanupResult {
  *
  * Converts noisy transcription into a clean monophonic event
  * stream: confidence filtering, minimum-duration filtering, merging
- * split notes, collapsing overlapping duplicates to the stronger
- * event, and removing sustained background notes (pad filter).
- * Never classifies styles.
+ * split notes, removing sustained background notes (pad filter), and
+ * collapsing near-simultaneous detections (a fundamental plus its
+ * harmonic bleed) to the single strongest event. Never classifies
+ * styles.
  */
 export function cleanup(events: readonly RawPitchEvent[], config: AnalysisConfig): CleanupResult {
   const ordered = [...events].sort(
@@ -40,11 +41,11 @@ export function cleanup(events: readonly RawPitchEvent[], config: AnalysisConfig
   );
 
   const merged = mergeSplitNotes(confident, config.mergeGapSeconds);
-  // Pad removal must precede the monophonic collapse: a sustained
+  // Pad removal must precede the simultaneity collapse: a sustained
   // background note overlaps every arp step, and letting it into the
-  // overlap resolution would let it swallow the sequence it sits under.
+  // reduction would let it swallow the sequence it sits under.
   const withoutSustained = removeSustained(merged, config.sustainedDurationFactor);
-  const kept = collapseOverlaps(withoutSustained, config.overlapTolerance);
+  const kept = collapseSimultaneous(withoutSustained, config.simultaneityWindowSeconds);
 
   const transcriptionQuality =
     kept.length === 0
@@ -82,31 +83,36 @@ function mergeSplitNotes(events: readonly RawPitchEvent[], maxGap: number): RawP
 }
 
 /**
- * Enforces monophony: when two events share more than the tolerated
- * fraction of the shorter one's duration, the more confident event
- * wins (ties keep the earlier, then lower-pitched one — the sort
- * order).
+ * Enforces monophony by INSTANT, not by duration overlap. Events
+ * whose onsets fall inside one window are the same musical moment —
+ * a struck note plus the harmonic partials the transcription model
+ * fires alongside it — and reduce to the single most-confident
+ * (loudest) event, the fundamental. Because sequential arp steps are
+ * a full step apart, a quiet turnaround note on its own step is
+ * never merged into a louder neighbour, even when their note
+ * durations overlap. Input must be onset-sorted.
  */
-function collapseOverlaps(events: readonly RawPitchEvent[], tolerance: number): RawPitchEvent[] {
+function collapseSimultaneous(
+  events: readonly RawPitchEvent[],
+  windowSeconds: number,
+): RawPitchEvent[] {
   const result: RawPitchEvent[] = [];
 
-  for (const event of events) {
-    const previous = result[result.length - 1];
-    if (previous === undefined) {
-      result.push(event);
-      continue;
-    }
+  let index = 0;
+  while (index < events.length) {
+    const clusterStart = events[index].onsetSeconds;
+    let strongest = events[index];
+    let next = index + 1;
 
-    const overlap = previous.onsetSeconds + previous.durationSeconds - event.onsetSeconds;
-    const shorter = Math.min(previous.durationSeconds, event.durationSeconds);
-
-    if (overlap > 0 && shorter > 0 && overlap / shorter > tolerance) {
-      if (event.confidence > previous.confidence) {
-        result[result.length - 1] = event;
+    while (next < events.length && events[next].onsetSeconds - clusterStart <= windowSeconds) {
+      if (events[next].confidence > strongest.confidence) {
+        strongest = events[next];
       }
-    } else {
-      result.push(event);
+      next += 1;
     }
+
+    result.push(strongest);
+    index = next;
   }
 
   return result;
