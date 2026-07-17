@@ -1,16 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { enumerateHypotheses } from '../../analysis/engine/hypothesis-enumeration';
-import type { DetectedCycle } from '../../analysis/engine/types';
 import { matchHypotheses, selectMatch } from '../../analysis/matcher/style-matching';
 import { DEFAULT_ANALYSIS_CONFIG } from '../../config/analysis';
 
-function cycleOf(midis: readonly number[]): DetectedCycle {
-  return { midis, periodSteps: midis.length, repetitions: 2 };
-}
-
 function select(midis: readonly number[]) {
-  const cycle = cycleOf(midis);
-  return selectMatch(matchHypotheses(cycle, enumerateHypotheses(cycle)), DEFAULT_ANALYSIS_CONFIG);
+  return selectMatch(matchHypotheses(midis, enumerateHypotheses(midis)), DEFAULT_ANALYSIS_CONFIG);
 }
 
 // C2, E2, G2.

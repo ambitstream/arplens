@@ -1,16 +1,21 @@
 import type { AnalysisConfig } from '../../config/analysis';
 import { indexToMidi } from '../../utils/index-to-midi';
-import type { DetectedCycle, Hypothesis, HypothesisMatch } from '../engine/types';
+import type { Hypothesis, HypothesisMatch } from '../engine/types';
 import { getStyleById, STYLE_REGISTRY } from '../registry/style-registry';
-import { editDistance } from './edit-distance';
+import { editDistanceToPrefix } from './edit-distance';
 
 /**
  * Stage 9 — Style Matching (D-201, D-202, D-206).
  *
  * Generates the candidate cycle for every hypothesis through the
- * Style Registry, scores it against the detected cycle with
- * rotation-invariant edit distance, and selects a winner with the
- * deterministic tie-break chain.
+ * Style Registry, TILES it across the full observed sequence, and
+ * scores it with rotation-invariant edit distance. Tiling uses every
+ * observed repetition as evidence: a clean multi-cycle take still
+ * scores distance 0, while an isolated transcription dropout costs
+ * only its edit — instead of destroying exact periodicity and with
+ * it the whole match. A truncated final repetition falls out of the
+ * tiling for free. The winner is selected with the deterministic
+ * tie-break chain.
  *
  * For the ambiguity component, hypotheses are grouped by OBSERVABLE
  * OUTPUT: two hypotheses whose generated cycles are rotations of
@@ -41,7 +46,7 @@ export interface MatchSelection {
 }
 
 export function matchHypotheses(
-  cycle: DetectedCycle,
+  observed: readonly number[],
   hypotheses: readonly Hypothesis[],
 ): readonly HypothesisMatch[] {
   return hypotheses.map((hypothesis) => {
@@ -57,8 +62,13 @@ export function matchHypotheses(
     let distance = Number.POSITIVE_INFINITY;
     let bestRotation = 0;
     for (let rotation = 0; rotation < Math.max(1, generated.length); rotation += 1) {
-      const rotated = rotate(generated, rotation);
-      const d = editDistance(rotated, cycle.midis);
+      // Rotate the base cycle (the loop may start mid-cycle), then
+      // tile ONE repetition past the observed length: transcription
+      // dropouts shift the alignment, and the surplus keeps pattern
+      // available at the tail. Prefix scoring makes the unused
+      // surplus free — it lies beyond the loop's end.
+      const tiled = tileTo(rotate(generated, rotation), observed.length + generated.length);
+      const d = editDistanceToPrefix(tiled, observed);
       // Strict < keeps the SMALLEST rotation achieving the minimum,
       // which is what phase preference (D-202 rule 3) tests against.
       if (d < distance) {
@@ -67,7 +77,13 @@ export function matchHypotheses(
       }
     }
 
-    const longest = Math.max(generated.length, cycle.midis.length, 1);
+    // A candidate longer than the observation was truncated by the
+    // tiling: its unheard remainder is unverified, not confirmed.
+    // Without this penalty, UpDown truncated to its ascending half
+    // would "exactly match" a single Up cycle it never disproved.
+    distance += Math.max(0, generated.length - observed.length);
+
+    const longest = Math.max(observed.length, generated.length, 1);
 
     return {
       hypothesis,
@@ -77,6 +93,13 @@ export function matchHypotheses(
       bestRotation,
     };
   });
+}
+
+function tileTo(pattern: readonly number[], length: number): number[] {
+  if (pattern.length === 0) {
+    return [];
+  }
+  return Array.from({ length }, (_, i) => pattern[i % pattern.length]);
 }
 
 export function selectMatch(

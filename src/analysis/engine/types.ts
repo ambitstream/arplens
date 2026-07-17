@@ -35,13 +35,6 @@ export interface QuantizedSequence {
   readonly holeCount: number;
 }
 
-/** Stage 7 output: one detected cycle. */
-export interface DetectedCycle {
-  readonly midis: readonly number[];
-  readonly periodSteps: number;
-  readonly repetitions: number;
-}
-
 /**
  * Stage 8: one candidate explanation of the observed cycle (D-200:
  * Input Notes, Octaves and Style are always solved together).

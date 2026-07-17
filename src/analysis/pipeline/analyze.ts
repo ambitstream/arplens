@@ -6,7 +6,6 @@ import {
   toConfidenceBand,
   weakestComponent,
 } from '../engine/confidence';
-import { detectCycle } from '../engine/cycle-detection';
 import { enumerateHypotheses } from '../engine/hypothesis-enumeration';
 import { quantize } from '../engine/quantization';
 import { estimateStepGrid } from '../engine/step-grid';
@@ -59,8 +58,14 @@ export function analyze(
 
   const grid = estimateStepGrid(ordered, config);
   const quantized = quantize(ordered, grid);
-  const cycle = detectCycle(quantized);
-  const matches = matchHypotheses(cycle, enumerateHypotheses(cycle));
+
+  // Stages 7-9 jointly: each hypothesis's registry cycle is tiled
+  // across the full quantized sequence, so rotation-invariant
+  // matching finds the repeating period and scores it in one pass —
+  // robust to a truncated final repetition and to isolated
+  // transcription dropouts, without approximate cycle detection.
+  const observed = quantized.notes.map((note) => note.midi);
+  const matches = matchHypotheses(observed, enumerateHypotheses(observed));
   const selection = selectMatch(matches, config);
   const bpmRate = resolveBpmRate(grid.stepDurationSeconds, config);
 
