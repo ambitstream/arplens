@@ -1,4 +1,5 @@
 import { AnalysisDebug } from '../components/analysis-debug';
+import { AudioDebug } from '../components/audio-debug';
 import { RegistryDebug } from '../components/registry-debug';
 
 export function App() {
@@ -14,6 +15,7 @@ export function App() {
 
       <RegistryDebug />
       <AnalysisDebug />
+      <AudioDebug />
     </main>
   );
 }

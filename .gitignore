@@ -90,3 +90,6 @@ temp/
 # Local configuration
 # -------------------------
 .local/
+# Runtime assets copied from node_modules on postinstall
+public/models/
+public/tfjs-wasm/
