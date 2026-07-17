@@ -8,6 +8,51 @@ import { SUPPORTED_RATES, type SupportedRate } from './rates';
  * calibration against the benchmark corpus happens in M6.
  */
 export interface AnalysisConfig {
+  /** Sample rate Basic Pitch expects; PCM is resampled to this. */
+  readonly transcriptionSampleRate: number;
+
+  /** Basic Pitch onset threshold (stage 2; calibrated in M6). */
+  readonly onsetThreshold: number;
+
+  /** Basic Pitch frame threshold (stage 2; calibrated in M6). */
+  readonly frameThreshold: number;
+
+  /** Minimum note length in model frames (~11.6 ms each). */
+  readonly minNoteLengthFrames: number;
+
+  /** Cleanup: events below this confidence are discarded. */
+  readonly minEventConfidence: number;
+
+  /** Cleanup: events shorter than this are discarded. */
+  readonly minEventDurationSeconds: number;
+
+  /** Cleanup: same-pitch events closer than this gap are merged. */
+  readonly mergeGapSeconds: number;
+
+  /**
+   * Cleanup: events longer than this factor times the median
+   * duration are treated as sustained background (pad filter).
+   */
+  readonly sustainedDurationFactor: number;
+
+  /**
+   * Cleanup: events whose onsets fall within this window are treated
+   * as one instant (a fundamental plus its bleed / near-simultaneous
+   * harmonics) and collapse to the single most-confident event.
+   * Distinct sequential steps have onsets a full step apart, so they
+   * are never merged — unlike duration-overlap collapse, which drops
+   * a quiet turnaround note whose tail laps into a louder neighbour.
+   */
+  readonly simultaneityWindowSeconds: number;
+
+  /**
+   * Step-grid selection: weight of the empty-step ratio added to the
+   * residual when comparing grid candidates. A grid that leaves many
+   * steps unoccupied is a worse explanation of the onsets than one
+   * that fills them, even at slightly higher residual.
+   */
+  readonly gridHolePenalty: number;
+
   /** Fewer note events than this cannot establish a grid. */
   readonly minEvents: number;
 
@@ -51,6 +96,16 @@ export interface AnalysisConfig {
 }
 
 export const DEFAULT_ANALYSIS_CONFIG: AnalysisConfig = {
+  transcriptionSampleRate: 22050,
+  onsetThreshold: 0.3,
+  frameThreshold: 0.3,
+  minNoteLengthFrames: 3,
+  minEventConfidence: 0.3,
+  minEventDurationSeconds: 0.03,
+  mergeGapSeconds: 0.04,
+  sustainedDurationFactor: 4,
+  simultaneityWindowSeconds: 0.03,
+  gridHolePenalty: 0.5,
   minEvents: 3,
   ioiClusterTolerance: 0.1,
   maxResidualRatio: 0.55,

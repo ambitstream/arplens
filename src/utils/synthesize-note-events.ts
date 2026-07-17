@@ -17,6 +17,8 @@ export interface SynthesisSettings {
   readonly jitterRatio?: number;
   /** Seed for the deterministic jitter generator. */
   readonly seed?: number;
+  /** Note duration as a fraction of the step (default 0.8). */
+  readonly gateRatio?: number;
 }
 
 /**
@@ -54,7 +56,7 @@ export function synthesizeNoteEvents(settings: SynthesisSettings): NoteEvent[] {
       events.push({
         midi: indexToMidi(cycle[position][0], settings.baseMidis),
         onsetSeconds: stepIndex * stepSeconds + (jitterRatio > 0 ? nextJitter() : 0),
-        durationSeconds: stepSeconds * 0.8,
+        durationSeconds: stepSeconds * (settings.gateRatio ?? 0.8),
       });
     }
   }

@@ -1,18 +1,19 @@
 import { STYLE_REGISTRY } from '../registry/style-registry';
-import type { DetectedCycle, Hypothesis } from './types';
+import type { Hypothesis } from './types';
 
 /**
  * Stage 8 — Joint Hypothesis Enumeration (D-200).
  *
  * Input Notes, Octaves and Style are enumerated together, never
  * inferred independently. Candidates come from the distinct pitches
- * of the detected cycle: for every octave count that decomposes the
- * pitch set into base notes replicated at +12-semitone intervals,
- * one hypothesis is generated per registry style — in registry
- * order, which is significant for the final tie-break (D-202).
+ * of the observed sequence: for every octave count that decomposes
+ * the pitch set into base notes replicated at +12-semitone
+ * intervals, one hypothesis is generated per registry style — in
+ * registry order, which is significant for the final tie-break
+ * (D-202).
  */
-export function enumerateHypotheses(cycle: DetectedCycle): readonly Hypothesis[] {
-  const distinct = [...new Set(cycle.midis)].sort((a, b) => a - b);
+export function enumerateHypotheses(observed: readonly number[]): readonly Hypothesis[] {
+  const distinct = [...new Set(observed)].sort((a, b) => a - b);
   const total = distinct.length;
 
   if (total === 0) {

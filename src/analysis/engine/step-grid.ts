@@ -31,17 +31,23 @@ export function estimateStepGrid(events: readonly NoteEvent[], config: AnalysisC
   const candidates = clusterCenters(iois, config.ioiClusterTolerance);
 
   let best: StepGrid | undefined;
+  let bestCost = Number.POSITIVE_INFINITY;
   for (const stepDuration of candidates) {
     const grid = bestPhaseForStep(onsets, stepDuration);
-    // Prefer lower residual; on ties (within float noise) prefer the
-    // LARGER step: fewer steps is the simpler explanation.
+    // Combined cost: alignment residual plus a penalty for empty
+    // steps. Doubled onsets from transcription can make a denser
+    // (wrong) grid win on residual alone, while leaving a third of
+    // its steps unoccupied — a worse explanation of the material.
+    const cost = grid.residualRatio + config.gridHolePenalty * holeRatio(onsets, grid);
     if (
       best === undefined ||
-      grid.residualRatio < best.residualRatio - 1e-9 ||
-      (Math.abs(grid.residualRatio - best.residualRatio) <= 1e-9 &&
-        grid.stepDurationSeconds > best.stepDurationSeconds)
+      cost < bestCost - 1e-9 ||
+      // On ties (within float noise) prefer the LARGER step: fewer
+      // steps is the simpler explanation.
+      (Math.abs(cost - bestCost) <= 1e-9 && grid.stepDurationSeconds > best.stepDurationSeconds)
     ) {
       best = grid;
+      bestCost = cost;
     }
   }
 
@@ -50,6 +56,16 @@ export function estimateStepGrid(events: readonly NoteEvent[], config: AnalysisC
   }
 
   return best;
+}
+
+/** Fraction of steps in the occupied range without any onset. */
+function holeRatio(onsets: readonly number[], grid: StepGrid): number {
+  const indices = new Set(
+    onsets.map((onset) => Math.round((onset - grid.phaseSeconds) / grid.stepDurationSeconds)),
+  );
+  const sorted = [...indices].sort((a, b) => a - b);
+  const span = sorted[sorted.length - 1] - sorted[0] + 1;
+  return span <= 0 ? 0 : (span - indices.size) / span;
 }
 
 /**

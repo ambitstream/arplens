@@ -87,15 +87,20 @@ describe('analyze: robustness and honesty', () => {
   });
 
   it('reports notes + octaves without style when competitive styles disagree (Level 3)', () => {
-    // [C,E,G,C] is one edit from Up([C,E,G]) and one edit from
-    // UpDown([C,E,G,E]) — different outputs, equal scores. With a
-    // relaxed budget both stay credible: consensus on notes/octaves,
-    // no style claim, and ambiguity collapses confidence to low.
+    // [C,E,G,C] x2 reads as Up with an inserted C (distance 1) or as
+    // UpDown with substituted turnarounds (distance 2) — different
+    // outputs, close scores. With the budget and ambiguity window
+    // widened both stay credible: consensus on notes/octaves, no
+    // style claim, and ambiguity collapses confidence to low.
     const midis = [36, 40, 43, 36, 36, 40, 43, 36];
     const events = midis.map((midi, k) => ({ midi, onsetSeconds: k * 0.125 }));
 
     const result = analyze(events, {
-      config: { ...DEFAULT_ANALYSIS_CONFIG, editDistanceBudgetRatio: 0.3 },
+      config: {
+        ...DEFAULT_ANALYSIS_CONFIG,
+        editDistanceBudgetRatio: 0.3,
+        ambiguityEpsilon: 0.3,
+      },
     });
 
     expect(result.status).toBe('partial');
