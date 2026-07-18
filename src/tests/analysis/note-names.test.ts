@@ -8,10 +8,10 @@ describe('note names (D-004: sharp notation only)', () => {
     expect(midiToPitchClass(61)).toBe('C#');
   });
 
-  it('maps MIDI to names with octave numbers (C4 = 60)', () => {
-    expect(midiToNoteName(36)).toBe('C2');
-    expect(midiToNoteName(60)).toBe('C4');
-    expect(midiToNoteName(61)).toBe('C#4');
+  it('maps MIDI to names with octave numbers (middle C = C3)', () => {
+    expect(midiToNoteName(36)).toBe('C1');
+    expect(midiToNoteName(60)).toBe('C3');
+    expect(midiToNoteName(61)).toBe('C#3');
   });
 
   it('parses sharp pitch classes only', () => {

@@ -1,1 +1,42 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/*
+ * Amber Rack design tokens (design/styles.css) exposed as Tailwind v4
+ * theme variables, so utilities like bg-bg-1, text-accent, rounded-md
+ * and font-mono resolve to the design system.
+ */
+@theme {
+  --color-bg-0: #0b0a08;
+  --color-bg-1: #15120d;
+  --color-bg-2: #201b14;
+  --color-line: #2e2820;
+
+  --color-text-hi: #f6f2ec;
+  --color-text-mid: #a99f90;
+  --color-text-lo: #6c6252;
+
+  --color-accent: #f5972a;
+
+  --color-sem-green: #5cc98a;
+  --color-sem-yellow: #e9c342;
+  --color-sem-red: #ec6a6a;
+
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 13px;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg-0);
+  color: var(--color-text-hi);
+  font-family: var(--font-sans);
+}
