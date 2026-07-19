@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.3 (Frozen)
+**Version:** 2.4 (Frozen)
 
 ---
 
@@ -296,6 +296,9 @@ Examples:
 - F#
 
 Flat notation is never used.
+
+Octave numbers use middle C = C3 (MIDI 60), matching the DAWs
+the audience uses. See the Glossary "Octave Convention".
 
 ---
 

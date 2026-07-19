@@ -22,6 +22,10 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-explicit-any': 'error',
+      // React Compiler's ref rule false-positives on factory-created
+      // pointer handlers (WaveformPanel): the ref reads run only inside
+      // event handlers, after render, which is the supported pattern.
+      'react-hooks/refs': 'off',
     },
   },
   configPrettier,

@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.3 (Frozen)
+**Version:** 2.4 (Frozen)
 
 ---
 
@@ -232,6 +232,19 @@ The Analysis Engine compares all valid rotations.
 The ordered note sequence produced after Quantization.
 
 It represents the Analysis Engine's interpretation of the performed arpeggio.
+
+---
+
+# Octave Convention
+
+Displayed note names number octaves so that middle C (MIDI 60)
+is **C3**.
+
+This matches the DAWs the audience uses (Ableton, Cubase,
+Bitwig, FL Studio), not scientific / Logic notation where
+middle C is C4.
+
+Pitch classes always use sharp notation (see [[Input Notes]]).
 
 ---
 

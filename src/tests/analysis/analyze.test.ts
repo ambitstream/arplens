@@ -168,6 +168,7 @@ describe('analyze: determinism and reproducibility metadata', () => {
     );
 
     expect(result.inputNotes).toEqual(['C', 'D#', 'G']);
-    expect(result.sequence).toEqual(['C2', 'D#2', 'G2', 'C3', 'D#3', 'G3']);
+    // midi 36/39/43 with middle C = C3.
+    expect(result.sequence).toEqual(['C1', 'D#1', 'G1', 'C2', 'D#2', 'G2']);
   });
 });

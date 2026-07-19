@@ -60,6 +60,80 @@ v2.0.0 → v2.0.1
 
 ---
 
+# v2.4 (Frozen)
+
+Date:
+
+2026-07-18
+
+Status:
+
+Frozen (2026-07-18)
+
+---
+
+### Summary
+
+Note-name octave convention fixed to middle C = C3, and the M5
+interface implemented.
+
+---
+
+### Changes
+
+1. **Octave convention: middle C = C3.** Displayed note names
+   (Result DTO `inputNotes` / `sequence`, and every UI readout) now
+   number octaves so that MIDI 60 = "C3", matching the DAWs the
+   audience uses (Ableton, Cubase, Bitwig, FL) rather than
+   scientific / Logic "C4". Surfaced by a real-audio test where the
+   user's "A#2" was exactly the pitch the engine had been labelling
+   "A#3". Pitch detection was always correct; only the display
+   numbering changed. The v2.0–v2.3 UI Specification's illustrative
+   sequence example (`C2 D#2 G2 …`) is unaffected in spirit — those
+   were sample values, not a convention statement.
+
+2. **Milestone 5 implemented**: the complete Amber Rack MVP
+   interface — single-panel workflow, Waveform focus/loop selection,
+   Analysis states, ResultPanel with all editors, the Tone.MonoSynth
+   Preview Engine (D-500), exclusive Play Source / Play Modulation
+   (D-501), Arpeggio Sandbox, all eight error states, responsive
+   mobile layout. No specification changes beyond item 1.
+
+---
+
+### Changed Documents
+
+- 01_GLOSSARY.md (Octave Convention)
+- 02_PRD.md (Output note-naming note)
+
+All documents received a version bump to 2.4.
+
+---
+
+### Breaking Changes
+
+None. No implementation displayed note names before v2.4.
+
+---
+
+### Migration Notes
+
+None.
+
+---
+
+### Approval
+
+Approved by:
+
+User
+
+Date:
+
+2026-07-18
+
+---
+
 # v2.0 (Frozen)
 
 Date:
