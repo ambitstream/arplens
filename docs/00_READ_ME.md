@@ -1,6 +1,6 @@
 # ArpLens Documentation
 
-**Version:** 2.4 (Frozen)
+**Version:** 2.5 (Frozen)
 
 ---
 

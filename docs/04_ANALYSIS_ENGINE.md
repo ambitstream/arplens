@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.4 (Frozen)
+**Version:** 2.5 (Frozen)
 
 ---
 
@@ -163,7 +163,7 @@ The engine receives:
 
 - mono PCM (Float32Array)
 - sample rate
-- loop duration (3–20 seconds)
+- loop duration (2–20 seconds)
 
 Responsibilities inside the engine:
 

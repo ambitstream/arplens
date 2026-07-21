@@ -25,7 +25,7 @@ export interface DecodedAudio {
  */
 const DECODE_SAMPLE_RATE = 44100;
 
-export async function decodeAudioFile(file: Blob, peakCount = 200): Promise<DecodedAudio> {
+export async function decodeAudioFile(file: Blob, peakCount = 100): Promise<DecodedAudio> {
   const sourceBuffer = await file.arrayBuffer();
 
   // OfflineAudioContext needs no audio output device (works in
@@ -76,7 +76,8 @@ function mixToMono(buffer: AudioBuffer): Float32Array {
   return mono;
 }
 
-function computePeaks(mono: Float32Array, peakCount: number): number[] {
+/** Max |amplitude| per bucket, for waveform rendering — also used to redraw a zoomed-in slice. */
+export function computePeaks(mono: Float32Array, peakCount: number): number[] {
   const bucketSize = Math.max(1, Math.floor(mono.length / peakCount));
   const peaks: number[] = [];
 

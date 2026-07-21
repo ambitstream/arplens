@@ -1,16 +1,27 @@
 import type { ReactNode } from 'react';
 
 /** Persistent top status bar (design: .bar). */
-export function TopBar() {
+export function TopBar({ onUpload }: { onUpload?: () => void }) {
   return (
     <div className="flex items-center justify-between border-b border-line bg-bg-2 px-[18px] py-[10px]">
       <div className="flex items-center gap-[9px]">
         <ArpMark className="h-[22px] w-[22px]" />
         <span className="font-mono text-[12px] font-semibold tracking-[0.08em]">ARPLENS</span>
       </div>
-      <div className="flex items-center gap-[7px] font-mono text-[11px] tracking-[0.05em] text-text-lo">
-        <span className="h-[7px] w-[7px] rounded-full bg-sem-green shadow-[0_0_8px_-1px_var(--color-sem-green)]" />
-        READY
+      <div className="flex items-center gap-4">
+        {onUpload !== undefined && (
+          <button
+            type="button"
+            onClick={onUpload}
+            className="font-mono text-[11px] tracking-[0.05em] text-text-mid hover:text-accent"
+          >
+            ↑ Upload File
+          </button>
+        )}
+        <div className="flex items-center gap-[7px] font-mono text-[11px] tracking-[0.05em] text-text-lo">
+          <span className="h-[7px] w-[7px] rounded-full bg-sem-green shadow-[0_0_8px_-1px_var(--color-sem-green)]" />
+          READY
+        </div>
       </div>
     </div>
   );

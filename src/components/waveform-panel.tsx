@@ -1,5 +1,8 @@
-import { useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LOOP_MAX_SECONDS, LOOP_MIN_SECONDS, type AppState } from '../app/state';
+import { computePeaks, extractLoop } from '../audio/audio-decode-service';
+
+const VIEW_PEAK_COUNT = 100;
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -16,6 +19,34 @@ export interface WaveformHandlers {
   onAnalyze: () => void;
   onPlaySource: () => void;
   onPause: () => void;
+  /** Fraction (0..1) through the currently playing source loop, if any. */
+  getSourceProgress: () => number | undefined;
+}
+
+/** Polls playback progress via rAF while Play Source is active. */
+function useSourcePlayhead(
+  playing: boolean,
+  getSourceProgress: () => number | undefined,
+): number | undefined {
+  const [progress, setProgress] = useState<number>();
+
+  useEffect(() => {
+    if (!playing) {
+      return;
+    }
+    let frame: number;
+    const tick = () => {
+      setProgress(getSourceProgress());
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      setProgress(undefined);
+    };
+  }, [playing, getSourceProgress]);
+
+  return progress;
 }
 
 type DragKind = 'move' | 'left' | 'right';
@@ -39,10 +70,30 @@ export function WaveformPanel({
 
   const focusEnd = state.focusStart + state.focusLength;
 
+  // Loop Selection zooms into the cropped focus region rather than
+  // showing the whole file — the timeline and bars below are drawn
+  // relative to this window, not [0, duration].
+  const viewStart = isLoop ? state.focusStart : 0;
+  const viewLength = isLoop ? state.focusLength : duration;
+
+  const viewPeaks = useMemo(() => {
+    if (decoded === undefined) {
+      return [];
+    }
+    if (!isLoop) {
+      return decoded.peaks;
+    }
+    const slice = extractLoop(decoded, viewStart, viewLength);
+    return computePeaks(slice, VIEW_PEAK_COUNT);
+  }, [decoded, isLoop, viewStart, viewLength]);
+
+  const playing = state.playback === 'source';
+  const sourceProgress = useSourcePlayhead(playing, handlers.getSourceProgress);
+
   // Ref reads live inside the event handlers below (never in render),
   // so the pointer geometry is computed from the track rect passed in.
   const secondsFromX = (clientX: number, rect: DOMRect): number =>
-    Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * duration;
+    viewStart + Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * viewLength;
 
   const onPointerDown = (kind: DragKind) => (event: React.PointerEvent) => {
     event.stopPropagation();
@@ -98,9 +149,8 @@ export function WaveformPanel({
     dragRef.current = null;
   };
 
-  const peaks = decoded?.peaks ?? [];
-  const leftPct = (regionStart / duration) * 100;
-  const widthPct = (regionLength / duration) * 100;
+  const leftPct = ((regionStart - viewStart) / viewLength) * 100;
+  const widthPct = (regionLength / viewLength) * 100;
 
   return (
     <section className="w-full max-w-[620px] overflow-hidden rounded-lg border border-line bg-bg-1">
@@ -154,34 +204,20 @@ export function WaveformPanel({
           onPointerUp={endDrag}
           className="relative h-[120px] touch-none select-none overflow-hidden rounded-sm border border-line bg-bg-2"
         >
-          <div className="absolute inset-0 flex items-center gap-[3px] px-3">
-            {peaks.map((peak, index) => (
-              <i
-                key={index}
-                className="flex-1 rounded-[1px] bg-text-lo opacity-40"
-                style={{ height: `${Math.max(4, peak * 100)}%` }}
-              />
-            ))}
-          </div>
-          <div
-            className="absolute inset-y-0 overflow-hidden"
-            style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-          >
-            <div
-              className="absolute inset-y-0 flex items-center gap-[3px] px-3"
-              style={{
-                width: `${(duration / regionLength) * 100}%`,
-                transform: `translateX(${-leftPct}%)`,
-              }}
-            >
-              {peaks.map((peak, index) => (
+          <div className="absolute inset-0 flex items-center gap-px px-3">
+            {viewPeaks.map((peak, index) => {
+              // Each bar's own time position decides its color — no
+              // clipping or transform math, correct for any region.
+              const barTime = viewStart + (index / Math.max(1, viewPeaks.length - 1)) * viewLength;
+              const inRegion = barTime >= regionStart && barTime <= regionStart + regionLength;
+              return (
                 <i
                   key={index}
-                  className="flex-1 rounded-[1px] bg-accent"
+                  className={`flex-1 rounded-[1px] ${inRegion ? 'bg-accent' : 'bg-text-lo opacity-40'}`}
                   style={{ height: `${Math.max(4, peak * 100)}%` }}
                 />
-              ))}
-            </div>
+              );
+            })}
           </div>
           <div
             role="slider"
@@ -209,13 +245,20 @@ export function WaveformPanel({
               </>
             )}
           </div>
+          {sourceProgress !== undefined && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 w-px bg-text-hi shadow-[0_0_6px_1px_rgba(246,242,236,0.6)]"
+              style={{ left: `${leftPct + sourceProgress * widthPct}%` }}
+            />
+          )}
         </div>
 
         <div className="mt-2.5 flex items-center justify-between font-mono text-[11px] text-text-lo">
           <span>
             {isLoop ? 'Loop · ' : 'Focus Region · '}
             <b className="font-semibold text-accent">{formatTime(regionLength)}</b>
-            {isLoop ? ' · 3–20s' : ' selected'}
+            {isLoop ? ' · 2–20s' : ' selected'}
           </span>
           <span>{isLoop ? 'drag edges to resize · body to move' : 'drag to reposition'}</span>
         </div>

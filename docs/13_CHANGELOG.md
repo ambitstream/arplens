@@ -60,6 +60,68 @@ v2.0.0 → v2.0.1
 
 ---
 
+# v2.5 (Frozen)
+
+Date:
+
+2026-07-21
+
+Status:
+
+Frozen (2026-07-21)
+
+---
+
+### Summary
+
+Minimum Loop Selection duration lowered from 3 seconds to 2 seconds.
+
+---
+
+### Changes
+
+1. **Loop minimum: 3s → 2s (D-402).** `LOOP_MIN_SECONDS` and the
+   Loop Selection drag/resize bounds now allow a 2-second minimum
+   loop, down from 3s. Allows faster, denser arpeggio phrases to be
+   selected as a single loop without truncation. Maximum (20s) is
+   unchanged.
+
+---
+
+### Changed Documents
+
+- 09_DECISIONS.md (D-402)
+- 01_GLOSSARY.md (Loop)
+- 04_ANALYSIS_ENGINE.md (loop duration bound)
+
+All documents received a version bump to 2.5.
+
+---
+
+### Breaking Changes
+
+None.
+
+---
+
+### Migration Notes
+
+None.
+
+---
+
+### Approval
+
+Approved by:
+
+User
+
+Date:
+
+2026-07-21
+
+---
+
 # v2.4 (Frozen)
 
 Date:
