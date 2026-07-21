@@ -25,7 +25,7 @@ export interface DecodedAudio {
  */
 const DECODE_SAMPLE_RATE = 44100;
 
-export async function decodeAudioFile(file: Blob, peakCount = 200): Promise<DecodedAudio> {
+export async function decodeAudioFile(file: Blob, peakCount = 100): Promise<DecodedAudio> {
   const sourceBuffer = await file.arrayBuffer();
 
   // OfflineAudioContext needs no audio output device (works in

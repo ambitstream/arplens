@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { decodeAudioFile, extractLoop } from '../audio/audio-decode-service';
 import { AnalysisService } from '../services/analysis-service';
 import { generateSequenceMidis, isComplete, stepDurationSeconds } from '../preview/arp-settings';
@@ -70,7 +70,7 @@ export function App() {
     }
   }, [state.decoded, state.loopStart, state.loopLength, playback]);
 
-  const previewSequence = useCallback((): PreviewSequence | undefined => {
+  const previewSequence = useMemo((): PreviewSequence | undefined => {
     const { settings, detectedSequence, detectedStepDuration } = state;
     if (isComplete(settings)) {
       const step = stepDurationSeconds(settings);
@@ -85,7 +85,30 @@ export function App() {
       return { midis, stepDurationSeconds: detectedStepDuration };
     }
     return undefined;
-  }, [state]);
+    // Deliberately narrow: depending on `state` would give a new
+    // reference on every dispatch (e.g. playback syncing), defeating
+    // the identity check the live-update effect below relies on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.settings, state.detectedSequence, state.detectedStepDuration]);
+
+  // While Play Modulation is active, apply edits live instead of
+  // requiring a manual stop/restart. Skips the sequence that
+  // onPlayModulation just started (tracked via the ref) so starting
+  // playback doesn't immediately re-trigger a redundant rebuild.
+  const modulationSequenceRef = useRef<PreviewSequence>(undefined);
+  useEffect(() => {
+    if (
+      playback.active === 'modulation' &&
+      previewSequence !== undefined &&
+      previewSequence !== modulationSequenceRef.current
+    ) {
+      modulationSequenceRef.current = previewSequence;
+      void playback.updateModulation(previewSequence);
+    }
+    // `playback` is a new object every render; depend on its stable
+    // fields only, or this would fire on every unrelated re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewSequence, playback.active, playback.updateModulation]);
 
   const resultHandlers: ResultPanelHandlers = {
     onNotes: (inputNotes: readonly PitchClass[]) => dispatch({ type: 'edit-notes', inputNotes }),
@@ -102,9 +125,9 @@ export function App() {
       }
     },
     onPlayModulation: () => {
-      const sequence = previewSequence();
-      if (sequence !== undefined) {
-        void playback.playModulation(sequence);
+      if (previewSequence !== undefined) {
+        modulationSequenceRef.current = previewSequence;
+        void playback.playModulation(previewSequence);
       }
     },
     onPause: () => playback.stop(),
@@ -112,9 +135,14 @@ export function App() {
 
   const hero = state.phase === 'sandbox' ? HERO_SANDBOX : HERO_DEFAULT;
 
+  const resetToUpload = () => {
+    playback.stop();
+    dispatch({ type: 'reset-to-upload' });
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-bg-0 text-text-hi">
-      <TopBar />
+      <TopBar onUpload={state.phase === 'upload' ? undefined : resetToUpload} />
       <main className="flex flex-1 flex-col items-center gap-7 px-6 pb-12 pt-10">
         <Hero headline={hero.headline} subtitle={hero.subtitle} />
 
@@ -125,11 +153,7 @@ export function App() {
               onSandbox={() => dispatch({ type: 'enter-sandbox' })}
             />
             {state.errorKind !== undefined && (
-              <AnalysisPanel
-                loading={false}
-                errorKind={state.errorKind}
-                onRetry={() => dispatch({ type: 'reset-to-upload' })}
-              />
+              <AnalysisPanel loading={false} errorKind={state.errorKind} onRetry={resetToUpload} />
             )}
           </>
         )}
@@ -145,13 +169,11 @@ export function App() {
                 playback.stop();
                 dispatch({ type: 'back-to-focus' });
               },
-              onClose: () => {
-                playback.stop();
-                dispatch({ type: 'reset-to-upload' });
-              },
+              onClose: resetToUpload,
               onAnalyze: () => void handleAnalyze(),
               onPlaySource: resultHandlers.onPlaySource,
               onPause: resultHandlers.onPause,
+              getSourceProgress: playback.getSourceProgress,
             }}
           />
         )}
@@ -160,10 +182,7 @@ export function App() {
           <AnalysisPanel
             loading={state.analyzeStatus === 'loading'}
             errorKind={state.errorKind}
-            onRetry={() => {
-              playback.stop();
-              dispatch({ type: 'reset-to-upload' });
-            }}
+            onRetry={resetToUpload}
           />
         )}
 
@@ -172,6 +191,7 @@ export function App() {
             state={state}
             sandbox={state.phase === 'sandbox'}
             handlers={resultHandlers}
+            playingIndex={playback.playingIndex}
           />
         )}
       </main>

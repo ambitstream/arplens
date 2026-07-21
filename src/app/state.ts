@@ -46,6 +46,13 @@ export interface AppState {
   readonly detectedSequence?: readonly string[];
   readonly detectedStepDuration?: number;
   readonly playback: PlaybackSource;
+  /**
+   * True once the user has changed any setting away from what
+   * analysis detected (or, in Sandbox, away from the seeded
+   * defaults). The Confidence badge only describes the original
+   * detection, so it is hidden once this is true.
+   */
+  readonly settingsEdited: boolean;
 }
 
 export const FOCUS_MAX_SECONDS = 60;
@@ -71,6 +78,7 @@ export const INITIAL_STATE: AppState = {
   analyzeStatus: 'idle',
   settings: EMPTY_SETTINGS,
   playback: 'none',
+  settingsEdited: false,
 };
 
 export type Action =
@@ -163,22 +171,39 @@ export function reducer(state: AppState, action: Action): AppState {
       };
 
     case 'edit-notes':
-      return { ...state, settings: { ...state.settings, inputNotes: action.inputNotes } };
+      return {
+        ...state,
+        settings: { ...state.settings, inputNotes: action.inputNotes },
+        settingsEdited: true,
+      };
 
     case 'edit-style':
-      return { ...state, settings: { ...state.settings, styleId: action.styleId } };
+      return {
+        ...state,
+        settings: { ...state.settings, styleId: action.styleId },
+        settingsEdited: true,
+      };
 
     case 'edit-rate':
-      return { ...state, settings: { ...state.settings, rate: action.rate } };
+      return {
+        ...state,
+        settings: { ...state.settings, rate: action.rate },
+        settingsEdited: true,
+      };
 
     case 'edit-octaves':
       return {
         ...state,
         settings: { ...state.settings, octaves: clampOctaves(action.octaves) },
+        settingsEdited: true,
       };
 
     case 'edit-bpm':
-      return { ...state, settings: { ...state.settings, bpm: action.bpm } };
+      return {
+        ...state,
+        settings: { ...state.settings, bpm: action.bpm },
+        settingsEdited: true,
+      };
 
     case 'set-playback':
       return { ...state, playback: action.source };
@@ -217,6 +242,7 @@ function applyResult(state: AppState, result: AnalysisResult): AppState {
     detectedSequence: result.sequence,
     detectedStepDuration: result.stepDuration,
     playback: 'none',
+    settingsEdited: false,
   };
 }
 

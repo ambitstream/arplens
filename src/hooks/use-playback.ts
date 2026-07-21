@@ -11,7 +11,12 @@ export function usePlayback() {
   const engineRef = useRef<PreviewEngine>(undefined);
   const audioCtxRef = useRef<AudioContext>(undefined);
   const sourceNodeRef = useRef<AudioBufferSourceNode>(undefined);
+  // AudioContext.currentTime the source started at, and its loop
+  // length — enough to compute playhead position without any timer.
+  const sourceStartedAtRef = useRef<number>(undefined);
+  const sourceLoopSecondsRef = useRef<number>(undefined);
   const [active, setActive] = useState<PlaybackSource>('none');
+  const [playingIndex, setPlayingIndex] = useState<number>();
 
   const stopSource = useCallback(() => {
     if (sourceNodeRef.current !== undefined) {
@@ -35,11 +40,16 @@ export function usePlayback() {
     async (sequence: PreviewSequence) => {
       stopSource();
       engineRef.current ??= new PreviewEngine();
-      await engineRef.current.start(sequence);
+      await engineRef.current.start(sequence, setPlayingIndex);
       setActive('modulation');
     },
     [stopSource],
   );
+
+  /** Applies an edited sequence to an already-playing modulation, live. */
+  const updateModulation = useCallback(async (sequence: PreviewSequence) => {
+    await engineRef.current?.update(sequence);
+  }, []);
 
   const playSource = useCallback(
     (mono: Float32Array, sampleRate: number) => {
@@ -57,10 +67,30 @@ export function usePlayback() {
       node.connect(ctx.destination);
       node.start();
       sourceNodeRef.current = node;
+      sourceStartedAtRef.current = ctx.currentTime;
+      sourceLoopSecondsRef.current = mono.length / sampleRate;
       setActive('source');
     },
     [stopSource],
   );
+
+  /** Fraction (0..1) through the looping source, or undefined when not playing it. */
+  const getSourceProgress = useCallback((): number | undefined => {
+    const ctx = audioCtxRef.current;
+    const startedAt = sourceStartedAtRef.current;
+    const loopSeconds = sourceLoopSecondsRef.current;
+    if (
+      ctx === undefined ||
+      startedAt === undefined ||
+      loopSeconds === undefined ||
+      loopSeconds <= 0 ||
+      sourceNodeRef.current === undefined
+    ) {
+      return undefined;
+    }
+    const elapsed = (ctx.currentTime - startedAt) % loopSeconds;
+    return elapsed / loopSeconds;
+  }, []);
 
   useEffect(
     () => () => {
@@ -71,5 +101,13 @@ export function usePlayback() {
     [stopSource],
   );
 
-  return { active, playModulation, playSource, stop };
+  return {
+    active,
+    playModulation,
+    updateModulation,
+    playSource,
+    stop,
+    getSourceProgress,
+    playingIndex,
+  };
 }

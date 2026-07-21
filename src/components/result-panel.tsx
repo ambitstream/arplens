@@ -61,10 +61,12 @@ export function ResultPanel({
   state,
   sandbox,
   handlers,
+  playingIndex,
 }: {
   state: AppState;
   sandbox: boolean;
   handlers: ResultPanelHandlers;
+  playingIndex?: number;
 }) {
   const { settings, result, detectedSequence, playback } = state;
   const complete = isComplete(settings);
@@ -96,7 +98,7 @@ export function ResultPanel({
         <span className="text-[15px] font-semibold">
           {sandbox ? 'Settings' : 'Detected settings'}
         </span>
-        {!sandbox && result?.confidence !== undefined && (
+        {!sandbox && !state.settingsEdited && result?.confidence !== undefined && (
           <ConfidenceBadge confidence={result.confidence} />
         )}
       </div>
@@ -124,7 +126,12 @@ export function ResultPanel({
         <RateEditor rate={settings.rate} onChange={handlers.onRate} />
         <OctavesEditor octaves={settings.octaves} onChange={handlers.onOctaves} />
         <NotesEditor notes={settings.inputNotes} onChange={handlers.onNotes} />
-        {sequence.length > 0 && <SequenceView sequence={sequence} />}
+        {sequence.length > 0 && (
+          <SequenceView
+            sequence={sequence}
+            playingIndex={playback === 'modulation' ? playingIndex : undefined}
+          />
+        )}
       </div>
 
       {stepDurationSeconds(settings) === undefined && state.detectedStepDuration === undefined && (

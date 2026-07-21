@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LOOP_MAX_SECONDS, LOOP_MIN_SECONDS, type AppState } from '../app/state';
 
 function formatTime(seconds: number): string {
@@ -16,6 +16,34 @@ export interface WaveformHandlers {
   onAnalyze: () => void;
   onPlaySource: () => void;
   onPause: () => void;
+  /** Fraction (0..1) through the currently playing source loop, if any. */
+  getSourceProgress: () => number | undefined;
+}
+
+/** Polls playback progress via rAF while Play Source is active. */
+function useSourcePlayhead(
+  playing: boolean,
+  getSourceProgress: () => number | undefined,
+): number | undefined {
+  const [progress, setProgress] = useState<number>();
+
+  useEffect(() => {
+    if (!playing) {
+      return;
+    }
+    let frame: number;
+    const tick = () => {
+      setProgress(getSourceProgress());
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      setProgress(undefined);
+    };
+  }, [playing, getSourceProgress]);
+
+  return progress;
 }
 
 type DragKind = 'move' | 'left' | 'right';
@@ -38,6 +66,9 @@ export function WaveformPanel({
   const regionLength = isLoop ? state.loopLength : state.focusLength;
 
   const focusEnd = state.focusStart + state.focusLength;
+
+  const playing = state.playback === 'source';
+  const sourceProgress = useSourcePlayhead(playing, handlers.getSourceProgress);
 
   // Ref reads live inside the event handlers below (never in render),
   // so the pointer geometry is computed from the track rect passed in.
@@ -154,34 +185,20 @@ export function WaveformPanel({
           onPointerUp={endDrag}
           className="relative h-[120px] touch-none select-none overflow-hidden rounded-sm border border-line bg-bg-2"
         >
-          <div className="absolute inset-0 flex items-center gap-[3px] px-3">
-            {peaks.map((peak, index) => (
-              <i
-                key={index}
-                className="flex-1 rounded-[1px] bg-text-lo opacity-40"
-                style={{ height: `${Math.max(4, peak * 100)}%` }}
-              />
-            ))}
-          </div>
-          <div
-            className="absolute inset-y-0 overflow-hidden"
-            style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-          >
-            <div
-              className="absolute inset-y-0 flex items-center gap-[3px] px-3"
-              style={{
-                width: `${(duration / regionLength) * 100}%`,
-                transform: `translateX(${-leftPct}%)`,
-              }}
-            >
-              {peaks.map((peak, index) => (
+          <div className="absolute inset-0 flex items-center gap-px px-3">
+            {peaks.map((peak, index) => {
+              // Each bar's own time position decides its color — no
+              // clipping or transform math, correct for any region.
+              const barTime = (index / Math.max(1, peaks.length - 1)) * duration;
+              const inRegion = barTime >= regionStart && barTime <= regionStart + regionLength;
+              return (
                 <i
                   key={index}
-                  className="flex-1 rounded-[1px] bg-accent"
+                  className={`flex-1 rounded-[1px] ${inRegion ? 'bg-accent' : 'bg-text-lo opacity-40'}`}
                   style={{ height: `${Math.max(4, peak * 100)}%` }}
                 />
-              ))}
-            </div>
+              );
+            })}
           </div>
           <div
             role="slider"
@@ -209,6 +226,13 @@ export function WaveformPanel({
               </>
             )}
           </div>
+          {sourceProgress !== undefined && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 w-px bg-text-hi shadow-[0_0_6px_1px_rgba(246,242,236,0.6)]"
+              style={{ left: `${leftPct + sourceProgress * widthPct}%` }}
+            />
+          )}
         </div>
 
         <div className="mt-2.5 flex items-center justify-between font-mono text-[11px] text-text-lo">

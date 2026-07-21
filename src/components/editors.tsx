@@ -315,16 +315,31 @@ export function NotesEditor({
   );
 }
 
-export function SequenceView({ sequence }: { sequence: readonly string[] }) {
+export function SequenceView({
+  sequence,
+  playingIndex,
+}: {
+  sequence: readonly string[];
+  /** Step currently sounding during Play Modulation, if any. */
+  playingIndex?: number;
+}) {
   return (
     <ParamTile label="Detected Sequence" wide>
       <div className="flex flex-wrap gap-1.5">
         {sequence.map((note, index) => (
           <span
             key={index}
-            className="rounded-sm border border-line bg-bg-1 px-2.5 py-[6px] font-mono text-[13px] font-medium text-text-hi"
+            className={`rounded-sm border px-2.5 py-[6px] font-mono text-[13px] font-medium ${
+              playingIndex === index
+                ? 'border-accent/45 bg-accent/15 text-accent'
+                : 'border-line bg-bg-1 text-text-hi'
+            }`}
           >
-            {index === 0 ? <b className="font-semibold text-accent">{note}</b> : note}
+            {playingIndex === undefined && index === 0 ? (
+              <b className="font-semibold text-accent">{note}</b>
+            ) : (
+              note
+            )}
           </span>
         ))}
       </div>
