@@ -118,10 +118,15 @@ export function App() {
     onBpm: (bpm: number) => dispatch({ type: 'edit-bpm', bpm }),
     onPlaySource: () => {
       if (state.decoded !== undefined) {
-        playback.playSource(
-          extractLoop(state.decoded, state.loopStart, state.loopLength),
-          state.decoded.sampleRate,
-        );
+        // In the Focus Region step (waveStep === 'focus') loopStart/
+        // loopLength haven't been set from the focus region yet —
+        // Crop is what copies them over — so play the focus region
+        // itself until then.
+        const [start, length] =
+          state.waveStep === 'loop'
+            ? [state.loopStart, state.loopLength]
+            : [state.focusStart, state.focusLength];
+        playback.playSource(extractLoop(state.decoded, start, length), state.decoded.sampleRate);
       }
     },
     onPlayModulation: () => {

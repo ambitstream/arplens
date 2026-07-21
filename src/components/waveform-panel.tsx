@@ -1,5 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LOOP_MAX_SECONDS, LOOP_MIN_SECONDS, type AppState } from '../app/state';
+import { computePeaks, extractLoop } from '../audio/audio-decode-service';
+
+const VIEW_PEAK_COUNT = 100;
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -67,13 +70,30 @@ export function WaveformPanel({
 
   const focusEnd = state.focusStart + state.focusLength;
 
+  // Loop Selection zooms into the cropped focus region rather than
+  // showing the whole file — the timeline and bars below are drawn
+  // relative to this window, not [0, duration].
+  const viewStart = isLoop ? state.focusStart : 0;
+  const viewLength = isLoop ? state.focusLength : duration;
+
+  const viewPeaks = useMemo(() => {
+    if (decoded === undefined) {
+      return [];
+    }
+    if (!isLoop) {
+      return decoded.peaks;
+    }
+    const slice = extractLoop(decoded, viewStart, viewLength);
+    return computePeaks(slice, VIEW_PEAK_COUNT);
+  }, [decoded, isLoop, viewStart, viewLength]);
+
   const playing = state.playback === 'source';
   const sourceProgress = useSourcePlayhead(playing, handlers.getSourceProgress);
 
   // Ref reads live inside the event handlers below (never in render),
   // so the pointer geometry is computed from the track rect passed in.
   const secondsFromX = (clientX: number, rect: DOMRect): number =>
-    Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * duration;
+    viewStart + Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * viewLength;
 
   const onPointerDown = (kind: DragKind) => (event: React.PointerEvent) => {
     event.stopPropagation();
@@ -129,9 +149,8 @@ export function WaveformPanel({
     dragRef.current = null;
   };
 
-  const peaks = decoded?.peaks ?? [];
-  const leftPct = (regionStart / duration) * 100;
-  const widthPct = (regionLength / duration) * 100;
+  const leftPct = ((regionStart - viewStart) / viewLength) * 100;
+  const widthPct = (regionLength / viewLength) * 100;
 
   return (
     <section className="w-full max-w-[620px] overflow-hidden rounded-lg border border-line bg-bg-1">
@@ -186,10 +205,10 @@ export function WaveformPanel({
           className="relative h-[120px] touch-none select-none overflow-hidden rounded-sm border border-line bg-bg-2"
         >
           <div className="absolute inset-0 flex items-center gap-px px-3">
-            {peaks.map((peak, index) => {
+            {viewPeaks.map((peak, index) => {
               // Each bar's own time position decides its color — no
               // clipping or transform math, correct for any region.
-              const barTime = (index / Math.max(1, peaks.length - 1)) * duration;
+              const barTime = viewStart + (index / Math.max(1, viewPeaks.length - 1)) * viewLength;
               const inRegion = barTime >= regionStart && barTime <= regionStart + regionLength;
               return (
                 <i

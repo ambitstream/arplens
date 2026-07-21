@@ -76,7 +76,8 @@ function mixToMono(buffer: AudioBuffer): Float32Array {
   return mono;
 }
 
-function computePeaks(mono: Float32Array, peakCount: number): number[] {
+/** Max |amplitude| per bucket, for waveform rendering — also used to redraw a zoomed-in slice. */
+export function computePeaks(mono: Float32Array, peakCount: number): number[] {
   const bucketSize = Math.max(1, Math.floor(mono.length / peakCount));
   const peaks: number[] = [];
 
