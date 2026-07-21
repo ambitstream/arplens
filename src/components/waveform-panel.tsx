@@ -258,7 +258,7 @@ export function WaveformPanel({
           <span>
             {isLoop ? 'Loop · ' : 'Focus Region · '}
             <b className="font-semibold text-accent">{formatTime(regionLength)}</b>
-            {isLoop ? ' · 3–20s' : ' selected'}
+            {isLoop ? ' · 2–20s' : ' selected'}
           </span>
           <span>{isLoop ? 'drag edges to resize · body to move' : 'drag to reposition'}</span>
         </div>

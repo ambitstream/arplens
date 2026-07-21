@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.4 (Frozen)
+**Version:** 2.5 (Frozen)
 
 ---
 
@@ -793,11 +793,13 @@ Users analyze only a seamless loop.
 
 Allowed duration:
 
-3–20 seconds.
+2–20 seconds.
 
 Rationale
 
-Improves cycle detection accuracy.
+Improves cycle detection accuracy. Lowered from 3s to 2s in v2.5 to
+allow faster, denser arpeggio phrases to be selected as a single
+loop without truncation.
 
 ---
 

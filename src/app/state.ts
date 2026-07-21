@@ -56,7 +56,7 @@ export interface AppState {
 }
 
 export const FOCUS_MAX_SECONDS = 60;
-export const LOOP_MIN_SECONDS = 3;
+export const LOOP_MIN_SECONDS = 2;
 export const LOOP_MAX_SECONDS = 20;
 
 const EMPTY_SETTINGS: ArpSettings = {

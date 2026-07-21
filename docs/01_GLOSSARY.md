@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.4 (Frozen)
+**Version:** 2.5 (Frozen)
 
 ---
 
@@ -126,7 +126,7 @@ All further analysis is performed only inside this region.
 
 # Loop
 
-The final 3–20 second fragment selected by the user for analysis.
+The final 2–20 second fragment selected by the user for analysis.
 
 The Loop should contain one seamlessly repeating arpeggio phrase.
 
