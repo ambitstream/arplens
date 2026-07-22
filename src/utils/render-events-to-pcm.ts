@@ -7,13 +7,26 @@ export interface RenderOptions {
   /** Linear release time appended after each note's duration. */
   readonly releaseSeconds?: number;
   readonly gain?: number;
+  /**
+   * Constant global detune applied to every note (Tier 2: Global
+   * Detuning). Positive sharpens, negative flattens.
+   */
+  readonly detuneCents?: number;
+  /**
+   * Overtones added on top of the fundamental (Tier 2: Rich
+   * Harmonics), as {ratio, gain} relative to the fundamental's own
+   * gain — e.g. `[{ratio: 2, gain: 0.4}]` adds a quieter octave
+   * above each note.
+   */
+  readonly harmonics?: readonly { readonly ratio: number; readonly gain: number }[];
 }
 
 /**
- * Renders note events to mono PCM with a plain sine oscillator and a
- * linear attack/release envelope — the "clean synthesizer" ground
- * truth for Tier 1 fixtures. Deliberately simple: harmonic-rich
- * material belongs to Tier 2 robustness fixtures, not Tier 1.
+ * Renders note events to mono PCM with a sine oscillator (optionally
+ * detuned and/or layered with harmonics) and a linear attack/release
+ * envelope. Tier 1 fixtures use none of the optional degradations —
+ * the "clean synthesizer" ground truth; Tier 2 fixtures use them to
+ * approximate real-world imperfections.
  */
 export function renderEventsToPcm(
   events: readonly NoteEvent[],
@@ -23,6 +36,8 @@ export function renderEventsToPcm(
   const attack = options.attackSeconds ?? 0.005;
   const release = options.releaseSeconds ?? 0.03;
   const gain = options.gain ?? 0.5;
+  const detune = Math.pow(2, (options.detuneCents ?? 0) / 1200);
+  const harmonics = options.harmonics ?? [];
 
   const end = events.reduce(
     (latest, event) =>
@@ -32,7 +47,7 @@ export function renderEventsToPcm(
   const output = new Float32Array(Math.ceil(end * sampleRate) + 1);
 
   for (const event of events) {
-    const frequency = 440 * Math.pow(2, (event.midi - 69) / 12);
+    const frequency = 440 * Math.pow(2, (event.midi - 69) / 12) * detune;
     const duration = event.durationSeconds ?? 0.1;
     const startSample = Math.round(event.onsetSeconds * sampleRate);
     const totalSamples = Math.round((duration + release) * sampleRate);
@@ -51,7 +66,11 @@ export function renderEventsToPcm(
 
       const index = startSample + i;
       if (index < output.length) {
-        output[index] += gain * envelope * Math.sin(2 * Math.PI * frequency * t);
+        let sample = Math.sin(2 * Math.PI * frequency * t);
+        for (const harmonic of harmonics) {
+          sample += harmonic.gain * Math.sin(2 * Math.PI * frequency * harmonic.ratio * t);
+        }
+        output[index] += gain * envelope * sample;
       }
     }
   }
