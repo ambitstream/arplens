@@ -17,6 +17,21 @@ export interface DecodedAudio {
   readonly peaks: readonly number[];
 }
 
+const SUPPORTED_EXTENSIONS = ['.mp3', '.wav', '.m4a'];
+
+/**
+ * Extension allowlist, checked before decodeAudioFile is called.
+ * `decodeAudioData` rejects both corrupted bytes and genuinely
+ * unsupported codecs with the same generic error, so it cannot tell
+ * "Unsupported Audio Format" apart from "Audio Decode Failed"
+ * (docs/06_UI_SPEC.md Error States) on its own — this gate is what
+ * makes that distinction deterministic.
+ */
+export function isSupportedAudioFile(file: File): boolean {
+  const name = file.name.toLowerCase();
+  return SUPPORTED_EXTENSIONS.some((ext) => name.endsWith(ext));
+}
+
 /**
  * decodeAudioData resamples to its context's rate, so pinning the
  * context rate makes the decode target deterministic instead of

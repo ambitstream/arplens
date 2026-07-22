@@ -15,7 +15,8 @@
     "test:run": "vitest run",
     "test:e2e": "playwright test",
     "postinstall": "node scripts/copy-model-assets.mjs",
-    "fixtures:render": "tsx scripts/render-audio-fixtures.ts"
+    "fixtures:render": "tsx scripts/render-audio-fixtures.ts",
+    "fixtures:render:tier3": "tsx scripts/render-tier3-fixtures.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
