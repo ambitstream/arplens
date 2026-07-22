@@ -17,7 +17,8 @@
     "postinstall": "node scripts/copy-model-assets.mjs",
     "fixtures:render": "tsx scripts/render-audio-fixtures.ts",
     "fixtures:render:tier2": "tsx scripts/render-tier2-fixtures.ts",
-    "fixtures:render:tier3": "tsx scripts/render-tier3-fixtures.ts"
+    "fixtures:render:tier3": "tsx scripts/render-tier3-fixtures.ts",
+    "golden-dataset:run": "tsx scripts/run-golden-dataset.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
