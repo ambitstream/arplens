@@ -60,6 +60,74 @@ v2.0.0 → v2.0.1
 
 ---
 
+# v2.6 (Frozen)
+
+Date:
+
+2026-07-22
+
+Status:
+
+Frozen (2026-07-22)
+
+---
+
+### Summary
+
+M6 documentation review: "Arpeggiator Style Not Detected" corrected
+from an error state to an honest partial result.
+
+---
+
+### Changes
+
+1. **Undetected style is a partial result, not an error state
+   (06_UI_SPEC.md).** The Error States list previously included
+   "Arpeggiator Style Not Detected" as one of eight distinct error
+   screens, but the implementation never routed it there — and
+   deliberately so: per D-003 and D-205, when notes and timing are
+   recovered but no supported style matches, the Results panel is
+   shown with the Style tile reading "Not detected" and every other
+   detected parameter still populated and editable. The spec now
+   describes this behavior, and the unused `style-not-detected`
+   ErrorKind and its copy were removed from the implementation. No
+   behavioral change — this documents and de-dead-codes what already
+   shipped.
+
+---
+
+### Changed Documents
+
+- 06_UI_SPEC.md (Error States)
+
+All documents received a version bump to 2.6.
+
+---
+
+### Breaking Changes
+
+None.
+
+---
+
+### Migration Notes
+
+None.
+
+---
+
+### Approval
+
+Approved by:
+
+User
+
+Date:
+
+2026-07-22
+
+---
+
 # v2.5 (Frozen)
 
 Date:

@@ -25,11 +25,6 @@ const ERROR_COPY: Record<ErrorKind, { title: string; detail: string }> = {
     title: 'No Repeating Arpeggio Detected',
     detail: 'Try a shorter loop that repeats seamlessly.',
   },
-  'style-not-detected': {
-    title: 'Arpeggiator Style Not Detected',
-    detail:
-      'The notes were detected but no supported style matched. You can set the style manually.',
-  },
   'engine-unavailable': {
     title: 'Analysis Engine Unavailable',
     detail: 'The analysis engine failed to start. Reload the page and try again.',

@@ -91,7 +91,8 @@ describe('analyze: robustness and honesty', () => {
     // UpDown with substituted turnarounds (distance 2) — different
     // outputs, close scores. With the budget and ambiguity window
     // widened both stay credible: consensus on notes/octaves, no
-    // style claim, and ambiguity collapses confidence to low.
+    // style claim, and ambiguity pulls confidence down to medium
+    // (M6 calibration: the medium floor is well below the old 0.5).
     const midis = [36, 40, 43, 36, 36, 40, 43, 36];
     const events = midis.map((midi, k) => ({ midi, onsetSeconds: k * 0.125 }));
 
@@ -107,7 +108,7 @@ describe('analyze: robustness and honesty', () => {
     expect(result.style).toBeUndefined();
     expect(result.inputNotes).toEqual(['C', 'E', 'G']);
     expect(result.octaves).toBe(1);
-    expect(result.confidence).toBe('low');
+    expect(result.confidence).toBe('medium');
   });
 
   it('fails honestly with no events', () => {
