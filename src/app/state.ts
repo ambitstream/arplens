@@ -13,14 +13,18 @@ export type WaveStep = 'focus' | 'loop';
 
 export type AnalyzeStatus = 'idle' | 'loading' | 'completed' | 'failed';
 
-/** The eight UI error states (docs/06_UI_SPEC.md Error States). */
+/**
+ * The UI error states (docs/06_UI_SPEC.md Error States). An
+ * undetected style is intentionally NOT here: per D-003/D-205 it is
+ * an honest partial result shown in the Results panel (style tile
+ * reads "Not detected"), never an error.
+ */
 export type ErrorKind =
   | 'unsupported-browser'
   | 'unsupported-format'
   | 'decode-failed'
   | 'no-pitched-notes'
   | 'no-repeating-arpeggio'
-  | 'style-not-detected'
   | 'engine-unavailable'
   | 'unexpected';
 

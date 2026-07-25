@@ -2,7 +2,7 @@
 
 **Project:** ArpLens
 
-**Version:** 2.5 (Frozen)
+**Version:** 2.6 (Frozen)
 
 ---
 
@@ -796,13 +796,19 @@ No Pitched Notes Detected
 
 No Repeating Arpeggio Detected
 
-Arpeggiator Style Not Detected
-
 Analysis Engine Unavailable
 
 Unexpected Error
 
 Each error has its own message.
+
+An **undetected arpeggiator style is not an error state**. Per D-003
+and D-205 (honest partial results), when notes and timing are
+recovered but no supported style matches, the Results panel is shown
+with the Style tile reading "Not detected" and every other detected
+parameter still populated and editable. This lets the user keep the
+usable result and set the style manually, rather than discarding the
+whole analysis behind an error screen.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { decodeAudioFile, extractLoop } from '../audio/audio-decode-service';
+import { decodeAudioFile, extractLoop, isSupportedAudioFile } from '../audio/audio-decode-service';
 import { AnalysisService } from '../services/analysis-service';
 import { generateSequenceMidis, isComplete, stepDurationSeconds } from '../preview/arp-settings';
 import type { PreviewSequence } from '../preview/preview-engine';
@@ -40,6 +40,10 @@ export function App() {
   const handleFile = useCallback(async (file: File) => {
     if (!browserSupported) {
       dispatch({ type: 'decode-error', error: 'unsupported-browser' });
+      return;
+    }
+    if (!isSupportedAudioFile(file)) {
+      dispatch({ type: 'decode-error', error: 'unsupported-format' });
       return;
     }
     try {

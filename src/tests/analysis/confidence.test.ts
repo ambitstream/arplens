@@ -30,9 +30,9 @@ describe('confidence', () => {
   });
 
   it('maps overall scores to bands at the configured floors', () => {
-    expect(toConfidenceBand(0.8, DEFAULT_ANALYSIS_CONFIG)).toBe('high');
-    expect(toConfidenceBand(0.79, DEFAULT_ANALYSIS_CONFIG)).toBe('medium');
-    expect(toConfidenceBand(0.5, DEFAULT_ANALYSIS_CONFIG)).toBe('medium');
-    expect(toConfidenceBand(0.49, DEFAULT_ANALYSIS_CONFIG)).toBe('low');
+    expect(toConfidenceBand(0.45, DEFAULT_ANALYSIS_CONFIG)).toBe('high');
+    expect(toConfidenceBand(0.44, DEFAULT_ANALYSIS_CONFIG)).toBe('medium');
+    expect(toConfidenceBand(0.35, DEFAULT_ANALYSIS_CONFIG)).toBe('medium');
+    expect(toConfidenceBand(0.34, DEFAULT_ANALYSIS_CONFIG)).toBe('low');
   });
 });

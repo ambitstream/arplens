@@ -84,7 +84,20 @@ export interface AnalysisConfig {
   /** D-207: deterministic rate preference order. */
   readonly ratePreferenceOrder: readonly SupportedRate[];
 
-  /** Confidence band floors (calibrated in M6). */
+  /**
+   * Confidence band floors. Calibrated in M6 against the synthetic
+   * corpus (docs/08_TEST_STRATEGY.md's Golden Dataset) — real
+   * commercial/self-produced audio was deferred, so these are a
+   * first pass, not final. Basic Pitch's own reported per-note
+   * confidence (the `transcription` component) is the binding
+   * constraint in every observed case, including clean Tier 1 ground
+   * truth: it tops out around 0.42-0.67 even for a pristine
+   * synthesized arpeggio (real instrument timbre, with harmonics,
+   * scored noticeably higher than the pure-sine Tier 1 baseline —
+   * the model appears calibrated on more realistic material). The
+   * old floors (0.8/0.5) made "High" unreachable by any fixture in
+   * the corpus, defeating the band's purpose.
+   */
   readonly confidenceHighFloor: number;
   readonly confidenceMediumFloor: number;
 
@@ -115,8 +128,8 @@ export const DEFAULT_ANALYSIS_CONFIG: AnalysisConfig = {
   preferredBpmMax: 180,
   fallbackBpm: 120,
   ratePreferenceOrder: ['1/16', '1/8', '1/32', '1/4', '1/16T', '1/8T', '1/32T', '1/4T'],
-  confidenceHighFloor: 0.8,
-  confidenceMediumFloor: 0.5,
+  confidenceHighFloor: 0.45,
+  confidenceMediumFloor: 0.35,
   defaultTranscriptionQuality: 1,
 };
 
