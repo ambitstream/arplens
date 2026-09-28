@@ -12,8 +12,13 @@ import type { RawPitchEvent } from '../engine/cleanup';
 /** Basic Pitch contour resolution: 3 bins per semitone. */
 const CONTOUR_BINS_PER_SEMITONE = 3;
 
-const MODEL_URL = '/models/basic-pitch/model.json';
-const TFJS_WASM_DIR = '/tfjs-wasm/';
+/**
+ * Asset URLs are prefixed with Vite's base path so the app works when
+ * served from a sub-path (GitHub Pages: /arplens/). BASE_URL always
+ * ends with a slash.
+ */
+const MODEL_URL = `${import.meta.env.BASE_URL}models/basic-pitch/model.json`;
+const TFJS_WASM_DIR = `${import.meta.env.BASE_URL}tfjs-wasm/`;
 
 let basicPitchPromise: Promise<BasicPitch> | undefined;
 
